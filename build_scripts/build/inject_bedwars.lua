@@ -3053,28 +3053,28 @@ local function authenticateUser()
 			end)
 			
 			task.wait(0.5)
-			print('[ezvape] auth: verified, unloading window')
-			pcall(function() Window:Unload() end)
-			print('[ezvape] auth: window unloaded')
-			pcall(function()
-				local destroyed = 0
-				local function cleanGuis(parent)
-					if not parent then return end
-					for _, child in ipairs(parent:GetChildren()) do
-						if child:IsA('ScreenGui') and not preRayfieldGuis[child] then
-							child:Destroy()
-							destroyed = destroyed + 1
+			authenticated = true
+			task.spawn(function()
+				task.wait(1)
+				pcall(function()
+					local destroyed = 0
+					local function cleanGuis(parent)
+						if not parent then return end
+						for _, child in ipairs(parent:GetChildren()) do
+							if child:IsA('ScreenGui') and child.Name:lower():find('rayfield') and not preRayfieldGuis[child] then
+								child:Destroy()
+								destroyed = destroyed + 1
+							end
 						end
 					end
-				end
-				cleanGuis(game:GetService('CoreGui'))
-				local player = game:GetService('Players').LocalPlayer
-				if player then
-					cleanGuis(player:FindFirstChild('PlayerGui'))
-				end
-				print('[ezvape] rayfield cleanup: destroyed ' .. tostring(destroyed) .. ' leftover screen guis')
+					cleanGuis(game:GetService('CoreGui'))
+					local player = game:GetService('Players').LocalPlayer
+					if player and player:FindFirstChild('PlayerGui') then
+						cleanGuis(player.PlayerGui)
+					end
+					print('[ezvape] rayfield cleanup: destroyed ' .. tostring(destroyed) .. ' leftover screen guis')
+				end)
 			end)
-			authenticated = true
 		else
 			Window:Notify({
 				title = "Error",

@@ -3061,7 +3061,7 @@ local function authenticateUser()
 				local function cleanGuis(parent)
 					if not parent then return end
 					for _, child in ipairs(parent:GetChildren()) do
-						if child:IsA('ScreenGui') and not preRayfieldGuis[child] then
+						if child:IsA('ScreenGui') and child.Name:lower():find('rayfield') and not preRayfieldGuis[child] then
 							child:Destroy()
 							destroyed = destroyed + 1
 						end
