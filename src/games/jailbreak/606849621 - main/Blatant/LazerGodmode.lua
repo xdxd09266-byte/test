@@ -1,1 +1,0 @@
-LazerGodmode = vape.Categories.Blatant:CreateModule({Name = 'LazerGodmode'})
