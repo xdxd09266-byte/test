@@ -15,7 +15,7 @@ local function downloadFile(path, func)
 			makefolder(folder)
 		end
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/ggman/main/'..select(1, path:gsub('newvape/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('newvape/', '')), true)
 		end)
 		if not suc or type(res) ~= 'string' or res == '404: Not Found' then
 			return nil
@@ -69,7 +69,7 @@ end
 local ezStatus = {}
 if not shared.VapeDeveloper then
 	local _, subbed = pcall(function()
-		return game:HttpGet('https://github.com/xdxd09266-byte/ggman')
+		return game:HttpGet('https://github.com/xdxd09266-byte/test')
 	end)
 	local commit = type(subbed) == 'string' and subbed:find('currentOid') or nil
 	commit = commit and subbed:sub(commit + 13, commit + 52) or nil

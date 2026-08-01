@@ -546,7 +546,7 @@ end
 -- Proceed with standard loading
 if not shared.VapeDeveloper and not isfile('newvape/profiles/local.txt') then
 	local _, subbed = pcall(function()
-		return game:HttpGet('https://github.com/xdxd09266-byte/ggman')
+		return game:HttpGet('https://github.com/xdxd09266-byte/test')
 	end)
 	local commit = nil
 	if type(subbed) == 'string' and not subbed:match('^%d%d%d:') then

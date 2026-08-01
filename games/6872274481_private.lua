@@ -5500,7 +5500,7 @@ task.spawn(function()
 	}
 	for _, modPath in publicMods do
 		pcall(function()
-			local code = game:HttpGet("https://raw.githubusercontent.com/xdxd09266-byte/ggman/main/src/games/bedwars/6872274481%20-%20game/"..modPath, true)
+			local code = game:HttpGet("https://raw.githubusercontent.com/xdxd09266-byte/test/main/src/games/bedwars/6872274481%20-%20game/"..modPath, true)
 			if code and #code > 10 then
 				loadstring(code, modPath)()
 			end
@@ -5510,3 +5510,4 @@ task.spawn(function()
 		end)
 	end
 end)
+

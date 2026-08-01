@@ -81,7 +81,7 @@ module.exports = function(basePath, name) {
 		if (args[0] === '6872274481') {
 			const fetcherCode = `\n\n-- Fetch public modules dynamically\ntask.spawn(function()\n\tlocal publicMods = {\n` +
 				Array.from(PUBLIC_MODULES.entries()).map(([file, cat]) => `\t\t"${cat}/${file}"`).join(',\n') +
-				`\n\t}\n\tfor _, modPath in publicMods do\n\t\tpcall(function()\n\t\t\tlocal code = game:HttpGet("https://raw.githubusercontent.com/xdxd09266-byte/ggman/main/src/games/bedwars/6872274481%20-%20game/"..modPath, true)\n\t\t\tif code and #code > 10 then\n\t\t\t\tloadstring(code, modPath)()\n\t\t\tend\n\t\t\tpcall(function()\n\t\t\t\ttask.wait(0.01)\n\t\t\tend)\n\t\tend)\n\tend\nend)\n`;
+				`\n\t}\n\tfor _, modPath in publicMods do\n\t\tpcall(function()\n\t\t\tlocal code = game:HttpGet("https://raw.githubusercontent.com/xdxd09266-byte/test/main/src/games/bedwars/6872274481%20-%20game/"..modPath, true)\n\t\t\tif code and #code > 10 then\n\t\t\t\tloadstring(code, modPath)()\n\t\t\tend\n\t\t\tpcall(function()\n\t\t\t\ttask.wait(0.01)\n\t\t\tend)\n\t\tend)\n\tend\nend)\n`;
 
 			fs.writeFileSync(path.join(DEST_PATH, 'games', args[0] + '_private.lua'), baseData + privateAppendData.join('\n\n') + fetcherCode);
 		}

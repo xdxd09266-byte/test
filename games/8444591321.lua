@@ -15,7 +15,7 @@ end
 local function downloadFile(path, func)
 	if not isfile(path) then
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/ggman/main/'..select(1, path:gsub('newvape/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('newvape/', '')), true)
 		end)
 		if not suc or res == '404: Not Found' then
 			error(res)
@@ -34,7 +34,7 @@ if isfile('newvape/games/'..vape.Place..'.lua') then
 else
 	if not shared.VapeDeveloper then
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/ggman/main/games/'..vape.Place..'.lua', true)
+			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/games/'..vape.Place..'.lua', true)
 		end)
 		if suc and res ~= '404: Not Found' then
 			loadstring(downloadFile('newvape/games/'..vape.Place..'.lua'), 'bedwars')()
