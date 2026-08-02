@@ -16,15 +16,27 @@ run(function()
                     if skaterController and not oldUpdate then
                         oldUpdate = skaterController.updateMomentum
                         skaterController.updateMomentum = function(self, ...)
-                            -- Force momentum to 0 internally
-                            self.momentum = -1e100
-                            
-                            -- Fire the UI event to visibly empty the bar
+                            self.momentum = 0
                             if MomentumBarUi and MomentumBarUi.momentumChanged then
                                 MomentumBarUi.momentumChanged:Fire(0)
                             end
-                            
                             return
+                        end
+                        
+                        -- Also remove the blockSprint modifier that Krystal applies on respawns
+                        local SprintController = Knit.Controllers.SprintController
+                        if SprintController then
+                            local RunService = game:GetService("RunService")
+                            KrystalModifierLoop = RunService.Heartbeat:Connect(function()
+                                local mod = SprintController:getMovementStatusModifier()
+                                if mod and mod.modifiers then
+                                    for i = #mod.modifiers, 1, -1 do
+                                        if type(mod.modifiers[i]) == "table" and mod.modifiers[i].blockSprint then
+                                            mod:removeModifier(mod.modifiers[i])
+                                        end
+                                    end
+                                end
+                            end)
                         end
                     end
                 end)
@@ -33,6 +45,11 @@ run(function()
                     skaterController.updateMomentum = oldUpdate
                     oldUpdate = nil
                 end
+                if KrystalModifierLoop then
+                    KrystalModifierLoop:Disconnect()
+                    KrystalModifierLoop = nil
+                end
+            end
             end
         end
     })
