@@ -11,12 +11,19 @@ run(function()
                     local Knit = require(game:GetService("ReplicatedStorage").rbxts_include.node_modules["@easy-games"].knit.src).KnitClient
                     skaterController = Knit.Controllers.GlacialSkaterController
                     
+                    local MomentumBarUi = require(game:GetService("Players").LocalPlayer.PlayerScripts.TS.controllers.games.bedwars.kit.kits["glacial-skater"]["momentum-bar-ui"])
+                    
                     if skaterController and not oldUpdate then
                         oldUpdate = skaterController.updateMomentum
                         skaterController.updateMomentum = function(self, ...)
-                            -- Intercept and cancel updateMomentum entirely
-                            -- This prevents SprintController:setSpeed() from being forced back down
-                            -- and stops the MomentumUpdate remote from firing.
+                            -- Force momentum to 0 internally
+                            self.momentum = 0
+                            
+                            -- Fire the UI event to visibly empty the bar
+                            if MomentumBarUi and MomentumBarUi.momentumChanged then
+                                MomentumBarUi.momentumChanged:Fire(0)
+                            end
+                            
                             return
                         end
                     end
