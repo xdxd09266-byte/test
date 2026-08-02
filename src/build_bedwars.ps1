@@ -1,7 +1,7 @@
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $privateDir = Join-Path $scriptDir "..\private"
 $gamesDir = Join-Path $scriptDir "..\games"
-$gameCompiledPath = Join-Path $scriptDir "..\build\inject_bedwars.lua"
+$gameCompiledPath = Join-Path $scriptDir "..\build\6872274481.lua"
 $gameSourceDir = Join-Path $privateDir "games\bedwars\6872274481 - game"
 $lobbySourceDir = Join-Path $privateDir "games\bedwars\6872265039 - lobby"
 $gameBaseDir = Join-Path $gamesDir "bedwars\6872274481 - game"
@@ -25,7 +25,7 @@ if (Test-Path $baseFile) {
 }
 
 # Then compile feature modules from private and public games directories
-$featureTypes = @("Blatant", "Legit", "Utility")
+$featureTypes = @("Combat", "Blatant", "Render", "Utility", "World", "Inventory", "Minigames", "Legit")
 foreach ($type in $featureTypes) {
     $dirsToCompile = @(
         (Join-Path $gameBaseDir $type),
