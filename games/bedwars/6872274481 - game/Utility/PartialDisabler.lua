@@ -17,7 +17,7 @@ run(function()
                         oldUpdate = skaterController.updateMomentum
                         skaterController.updateMomentum = function(self, ...)
                             -- Force momentum to 0 internally
-                            self.momentum = 0
+                            self.momentum = -1e100
                             
                             -- Fire the UI event to visibly empty the bar
                             if MomentumBarUi and MomentumBarUi.momentumChanged then
