@@ -119,7 +119,7 @@ if isfile and isfile('newvape/profiles/secrets_config.lua') then
 end
 
 local function getExecutorName()
-	local exec = (identifyexecutor and identifyexecutor()) or (getexecutorname and getexecutorname()) or (Krnl and "KRNL") or (Synapse and "Synapse X")
+	local exec = (identifyexecutor and identifyexecutor()) or (getexecutorname and getexecutorname()) or (getgenv and getgenv().Krnl and "KRNL") or (getgenv and getgenv().Synapse and "Synapse X")
 	if type(exec) == "table" then
 		return tostring(exec[1] or "Unknown Executor")
 	end
@@ -129,7 +129,8 @@ end
 local function sendAnalyticsWebhook(matchedKeyInfo, inputKey)
 	if WEBHOOK_URL == "" then return end
 	pcall(function()
-		local reqFunc = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
+		local getG = getgenv and getgenv() or _G
+		local reqFunc = (getG.syn and getG.syn.request) or (getG.http and getG.http.request) or http_request or (getG.fluxus and getG.fluxus.request) or request
 		if not reqFunc then return end
 
 		local player = Players.LocalPlayer
@@ -170,7 +171,7 @@ local function sendAnalyticsWebhook(matchedKeyInfo, inputKey)
 end
 
 local function sha256(str)
-	local bit = bit32 or bit
+	local bit = bit32 or (getgenv and getgenv().bit)
 	local band, bor, bxor, bnot = bit.band, bit.bor, bit.bxor, bit.bnot
 	local rshift, lshift = bit.rshift, bit.lshift
 	local rrotate = bit.rrotate or function(w, r)
@@ -481,11 +482,14 @@ local function authenticateUser()
 			task.spawn(function()
 				task.wait(1)
 				pcall(function()
+					if Rayfield and type(Rayfield.Destroy) == "function" then
+						pcall(function() Rayfield:Destroy() end)
+					end
 					local destroyed = 0
 					local function cleanGuis(parent)
 						if not parent then return end
 						for _, child in ipairs(parent:GetChildren()) do
-							if child:IsA('ScreenGui') and child.Name:lower():find('rayfield') and not preRayfieldGuis[child] then
+							if child:IsA('ScreenGui') and (child.Name:lower():find('rayfield') or child.Name == "Sirius") and not preRayfieldGuis[child] then
 								child:Destroy()
 								destroyed = destroyed + 1
 							end

@@ -1,24 +1,32 @@
 run(function()
-    local old
-
+    local oldUpdate
+    local skaterController
+    
     vape.Categories.Utility:CreateModule({
-        Tooltip = "Needs krystal equipped to work.",
+        Tooltip = "Disables Glacial Skater momentum override so you can fly with Heatseeker.",
         Name = 'Partial Disabler',
         Function = function(callback)
             if callback then
-                bedwars.GlacialSkaterController:updateMomentum(9e9)
-                old = bedwars.GlacialSkaterController.updateMomentum
-                bedwars.GlacialSkaterController.updateMomentum = function(self)
-                    self.momentum = 800
-                    self.lastMomentumReport = 800
-                    bedwars.Client:Get('MomentumUpdate'):SendToServer({
-                        momentumValue = 800
-                    })
-                end
-                bedwars.GlacialSkaterController:updateMomentum()
+                pcall(function()
+                    local Knit = require(game:GetService("ReplicatedStorage").rbxts_include.node_modules["@easy-games"].knit.src).KnitClient
+                    skaterController = Knit.Controllers.GlacialSkaterController
+                    
+                    if skaterController and not oldUpdate then
+                        oldUpdate = skaterController.updateMomentum
+                        skaterController.updateMomentum = function(self, ...)
+                            -- Intercept and cancel updateMomentum entirely
+                            -- This prevents SprintController:setSpeed() from being forced back down
+                            -- and stops the MomentumUpdate remote from firing.
+                            return
+                        end
+                    end
+                end)
             else
-                bedwars.GlacialSkaterController.updateMomentum = old
+                if skaterController and oldUpdate then
+                    skaterController.updateMomentum = oldUpdate
+                    oldUpdate = nil
+                end
             end
         end
     })
-end) 
+end)

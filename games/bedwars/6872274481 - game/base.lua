@@ -33,6 +33,9 @@ local assetfunction = getcustomasset
 
 
 local vape = shared.vape
+if not vape then
+	error("[ezvape] You executed the game module directly. You need to execute main.lua instead, which will automatically load this script once the GUI engine is initialized.")
+end
 local entitylib = vape.Libraries.entity
 local targetinfo = vape.Libraries.targetinfo
 local sessioninfo = vape.Libraries.sessioninfo
