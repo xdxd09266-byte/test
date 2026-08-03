@@ -57,14 +57,6 @@
             "expires_readable": "2026-07-30 18:01:35 UTC"
         },
         {
-            "hash": "0d2d7cde09b70b06076ffbff18735de413c7d1eae292003686f1125c06bd79cd",
-            "note": "2 hour alpha access for everyone",
-            "discord": "@everyone",
-            "active": true,
-            "expires": 4938958887,
-            "expires_readable": "2126-07-05 23:01:26"
-        },
-        {
             "hash": "3ee183b3a1031575cd48bd9bf4553d4071488fd11c34fed0bafcba1880105de2",
             "note": "Generated via Bot (6h)",
             "discord": "not6hour",
