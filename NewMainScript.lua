@@ -50,8 +50,9 @@ end
 
 local function downloadFile(path, func)
 	if not isfile(path) then
+		local targetPath = tostring(path):gsub('^weedhack/', '')
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('newvape/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..targetPath..'?t='..tostring(os.time()), true)
 		end)
 		if not suc or type(res) ~= 'string' or res:match('^%d%d%d:') then
 			return nil
@@ -72,7 +73,7 @@ local function wipeFolder(path)
 	end
 end
 
-for _, folder in {'newvape', 'newvape/games', 'newvape/profiles', 'newvape/assets', 'newvape/libraries', 'newvape/guis'} do
+for _, folder in {'weedhack', 'weedhack/games', 'weedhack/profiles', 'weedhack/assets', 'weedhack/libraries', 'weedhack/guis'} do
 	if not isfolder(folder) then
 		makefolder(folder)
 	end
@@ -84,10 +85,10 @@ local function ezLog(msg)
 		local rf = readfile or function() return '' end
 		local wf = writefile or function() end
 		local old = ''
-		pcall(function() old = rf('newvape/debug.log') or '' end)
+		pcall(function() old = rf('weedhack/debug.log') or '' end)
 		if type(old) ~= 'string' then old = '' end
 		if #old > 20000 then old = old:sub(-15000) end
-		wf('newvape/debug.log', old .. '\n[' .. tostring(os.time()) .. '] ' .. msg)
+		wf('weedhack/debug.log', old .. '\n[' .. tostring(os.time()) .. '] ' .. msg)
 	end)
 end
 
@@ -109,9 +110,9 @@ local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 
 local WEBHOOK_URL = ""
-if isfile and isfile('newvape/profiles/secrets_config.lua') then
+if isfile and isfile('weedhack/profiles/secrets_config.lua') then
 	local suc, res = pcall(function()
-		return HttpService:JSONDecode(readfile('newvape/profiles/secrets_config.lua'))
+		return HttpService:JSONDecode(readfile('weedhack/profiles/secrets_config.lua'))
 	end)
 	if suc and type(res) == 'table' and res.WEBHOOK_URL then
 		WEBHOOK_URL = res.WEBHOOK_URL
@@ -142,15 +143,15 @@ local function sendAnalyticsWebhook(matchedKeyInfo, inputKey)
 		local discordUser = (matchedKeyInfo and matchedKeyInfo.discord) or "N/A"
 
 		local embedData = {
-			["title"] = "🚀 ezvape Execution & Key Analytics",
+			["title"] = "ðŸš€ ezvape Execution & Key Analytics",
 			["color"] = 7506394, -- Discord Blurple
 			["fields"] = {
-				{ ["name"] = "👤 Roblox Player", ["value"] = username .. " (" .. tostring(userId) .. ")", ["inline"] = true },
-				{ ["name"] = "⚡ Executor", ["value"] = executorName, ["inline"] = true },
-				{ ["name"] = "🎮 Place ID", ["value"] = placeId, ["inline"] = true },
-				{ ["name"] = "🔑 Key Note / User", ["value"] = note, ["inline"] = true },
-				{ ["name"] = "💬 Discord Tag", ["value"] = discordUser ~= "" and discordUser or "N/A", ["inline"] = true },
-				{ ["name"] = "🔑 Entered Key", ["value"] = "`" .. tostring(inputKey):sub(1, 14) .. "...`", ["inline"] = true }
+				{ ["name"] = "ðŸ‘¤ Roblox Player", ["value"] = username .. " (" .. tostring(userId) .. ")", ["inline"] = true },
+				{ ["name"] = "âš¡ Executor", ["value"] = executorName, ["inline"] = true },
+				{ ["name"] = "ðŸŽ® Place ID", ["value"] = placeId, ["inline"] = true },
+				{ ["name"] = "ðŸ”‘ Key Note / User", ["value"] = note, ["inline"] = true },
+				{ ["name"] = "ðŸ’¬ Discord Tag", ["value"] = discordUser ~= "" and discordUser or "N/A", ["inline"] = true },
+				{ ["name"] = "ðŸ”‘ Entered Key", ["value"] = "`" .. tostring(inputKey):sub(1, 14) .. "...`", ["inline"] = true }
 			},
 			["footer"] = { ["text"] = "ezvape Security & Telemetry System" },
 			["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
@@ -251,9 +252,9 @@ local function sha256(str)
 end
 
 local function fetchKeys()
-	if isfile and isfile('newvape/keys.json') then
+	if isfile and isfile('weedhack/keys.json') then
 		local localSuc, localData = pcall(function()
-			return HttpService:JSONDecode(readfile('newvape/keys.json'))
+			return HttpService:JSONDecode(readfile('weedhack/keys.json'))
 		end)
 		if localSuc and localData and localData.keys then
 			return localData.keys
@@ -297,7 +298,7 @@ local function authenticateUser()
 		print("[ezvape Auth] Warning: Unable to fetch key database.")
 	end
 
-	local savedKey = isfile("newvape/profiles/key.txt") and readfile("newvape/profiles/key.txt"):gsub("%s+", "") or ""
+	local savedKey = isfile("weedhack/profiles/key.txt") and readfile("weedhack/profiles/key.txt"):gsub("%s+", "") or ""
 
 	if savedKey ~= "" and keyList then
 		local valid, msg, keyInfo = validateKey(savedKey, keyList)
@@ -400,8 +401,8 @@ local function authenticateUser()
 				local valid, msg, keyInfo = validateKey(key, keyList)
 				
 				if valid then
-					statusLabel.Text = "✅ Success!"
-					writefile("newvape/profiles/key.txt", key)
+					statusLabel.Text = "âœ… Success!"
+					writefile("weedhack/profiles/key.txt", key)
 					
 					task.spawn(function()
 						sendAnalyticsWebhook(keyInfo, key)
@@ -411,7 +412,7 @@ local function authenticateUser()
 					screenGui:Destroy()
 					authenticated = true
 				else
-					statusLabel.Text = "❌ " .. tostring(msg)
+					statusLabel.Text = "âŒ " .. tostring(msg)
 				end
 			end)
 			
@@ -450,7 +451,7 @@ local function authenticateUser()
 		if not keyToVerify or keyToVerify == "" then
 			Window:Notify({
 				title = "Error",
-				content = "❌ Please enter your key!",
+				content = "âŒ Please enter your key!",
 				duration = 3
 			})
 			return
@@ -458,7 +459,7 @@ local function authenticateUser()
         
 		Window:Notify({
 			title = "Verifying",
-			content = "⏳ Verifying...",
+			content = "â³ Verifying...",
 			duration = 2
 		})
 		
@@ -468,10 +469,10 @@ local function authenticateUser()
 		if valid then
 			Window:Notify({
 				title = "Success",
-				content = "✅ Access Granted! Loading...",
+				content = "âœ… Access Granted! Loading...",
 				duration = 2
 			})
-			writefile("newvape/profiles/key.txt", keyToVerify)
+			writefile("weedhack/profiles/key.txt", keyToVerify)
 			
 			task.spawn(function()
 				sendAnalyticsWebhook(keyInfo, keyToVerify)
@@ -506,7 +507,7 @@ local function authenticateUser()
 		else
 			Window:Notify({
 				title = "Error",
-				content = "❌ " .. tostring(msg),
+				content = "âŒ " .. tostring(msg),
 				duration = 5
 			})
 		end
@@ -520,15 +521,15 @@ local function authenticateUser()
 	Tab:CreateButton({
 		name = "Reset Key",
 		callback = function()
-			if isfile("newvape/profiles/key.txt") then
-				delfile("newvape/profiles/key.txt")
+			if isfile("weedhack/profiles/key.txt") then
+				delfile("weedhack/profiles/key.txt")
 			end
 			savedKey = ""
 			currentKeyInput = ""
 			keyInput:Set("", true)
 			Window:Notify({
 				title = "Success",
-				content = "✅ Key cleared! Please enter a new key.",
+				content = "âœ… Key cleared! Please enter a new key.",
 				duration = 3
 			})
 		end
@@ -548,7 +549,7 @@ if not authSuccess then
 end
 
 -- Proceed with standard loading
-if not shared.VapeDeveloper and not isfile('newvape/profiles/local.txt') then
+if not shared.VapeDeveloper and not isfile('weedhack/profiles/local.txt') then
 	local _, subbed = pcall(function()
 		return game:HttpGet('https://github.com/xdxd09266-byte/test')
 	end)
@@ -561,24 +562,24 @@ if not shared.VapeDeveloper and not isfile('newvape/profiles/local.txt') then
 		end
 	end
 	-- Only wipe when the repo is actually reachable (private/offline repos return 403/404 -> no wipe)
-	if commit and commit ~= (isfile('newvape/profiles/commit.txt') and readfile('newvape/profiles/commit.txt') or '') then
-		wipeFolder('newvape')
-		wipeFolder('newvape/games')
-		wipeFolder('newvape/guis')
-		wipeFolder('newvape/libraries')
+	if commit and commit ~= (isfile('weedhack/profiles/commit.txt') and readfile('weedhack/profiles/commit.txt') or '') then
+		wipeFolder('weedhack')
+		wipeFolder('weedhack/games')
+		wipeFolder('weedhack/guis')
+		wipeFolder('weedhack/libraries')
 		-- Preserve assets folder - don't wipe it
-		if not isfolder('newvape/assets') then
-			makefolder('newvape/assets')
+		if not isfolder('weedhack/assets') then
+			makefolder('weedhack/assets')
 		end
 	end
 	if commit then
-		writefile('newvape/profiles/commit.txt', commit)
+		writefile('weedhack/profiles/commit.txt', commit)
 	end
 end
 
 -- Safely download and execute main.lua
 ezLog('inject: auth passed, downloading main.lua')
-local mainScriptSource = downloadFile('newvape/main.lua')
+local mainScriptSource = downloadFile('weedhack/main.lua')
 
 if mainScriptSource then
 	local mainFunc, err = loadstring(mainScriptSource, "main")
@@ -595,5 +596,6 @@ if mainScriptSource then
 		ezError('Syntax error in main.lua:\n' .. tostring(err))
 	end
 else
-	ezError('Failed to download newvape/main.lua (network blocked?)')
+	ezError('Failed to download weedhack/main.lua (network blocked?)')
 end
+

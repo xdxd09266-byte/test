@@ -285,22 +285,12 @@ run(function()
 						entitylib.character.RootPart.CFrame = CFrame.lookAt(entitylib.character.RootPart.Position, Vector3.new(vec.X, entitylib.character.RootPart.Position.Y + 0.001, vec.Z))
 					end
 
-					if #attacked == 0 and hitCounter > 0 and (tick() - lastHitTick) > 1.5 then
+					if #attacked == 0 and hitCounter > 0 and (tick() - lastHitTick) > 0.5 then
 						hitCounter = 0
 					end
 					if #attacked > 0 then
 						lastHitTick = tick()
-						local extra
-						if hitCounter > 28 then
-							extra = 0.1
-						elseif hitCounter > 20 then
-							extra = 0.06
-						elseif hitCounter > 12 then
-							extra = 0.03
-						else
-							extra = 0
-						end
-						task.wait(#attacked * 0.02 + extra + math.random() * 0.005)
+						task.wait(math.clamp(1 / UpdateRate.Value, 0.001, 0.05) + math.random() * 0.002)
 					else
 						task.wait(1 / UpdateRate.Value)
 					end

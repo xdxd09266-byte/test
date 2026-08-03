@@ -52,7 +52,7 @@ local uipallet = {
 }
 
 local getcustomassets = {
-	['newvape/assets/wurst/triangle.png'] = 'rbxasset://wurst/triangle.png'
+	['weedhack/assets/wurst/triangle.png'] = 'rbxasset://wurst/triangle.png'
 }
 
 local isfile = isfile or function(file)
@@ -70,7 +70,7 @@ end
 
 local function downloadFile(path, func)
 	if not isfile(path) then
-		local suc, res = pcall(function() return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('newvape/', '')), true) end)
+		local suc, res = pcall(function() return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('weedhack/', '')), true) end)
 		if not suc or res == '404: Not Found' then error(res) end
 		if path:find('.lua') then res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.\n'..res end
 		writefile(path, res)
@@ -142,7 +142,7 @@ local function removeTags(str)
 end
 
 do
-	local res = isfile("newvape/profiles/color.txt") and loadJson("newvape/profiles/color.txt")
+	local res = isfile("weedhack/profiles/color.txt") and loadJson("weedhack/profiles/color.txt")
 	if res then
 		uipallet.Main = res.Main and Color3.fromRGB(unpack(res.Main)) or uipallet.Main
 		uipallet.Text = res.Text and Color3.fromRGB(unpack(res.Text)) or uipallet.Text
@@ -229,7 +229,7 @@ components = {
 			label.Name = 'DividerLabel'
 			label.Size = UDim2.fromOffset(218, 27)
 			label.BackgroundTransparency = 1
-			label.Text = '          '..text:upper()
+			label.Text = 'â€Šâ€Šâ€Šâ€Šâ€Šâ€Šâ€Šâ€Šâ€Šâ€Š'..text:upper()
 			label.TextXAlignment = Enum.TextXAlignment.Left
 			label.TextColor3 = color.Dark(uipallet.Text, 0.43)
 			label.TextSize = 9
@@ -328,7 +328,7 @@ function mainapi:CreateCategory(categorysettings)
 		triangle.Size = UDim2.fromOffset(28, 16)
 		triangle.Position = UDim2.new(1, -38, 0, 16)
 		triangle.BackgroundTransparency = 1
-		triangle.Image = getcustomasset('newvape/assets/wurst/triangle.png')
+		triangle.Image = getcustomasset('weedhack/assets/wurst/triangle.png')
 		triangle.AutoButtonColor = false
 		triangle.Parent = modulebutton
 		local modulechildren = Instance.new('ScrollingFrame')
@@ -621,3 +621,4 @@ mainapi:Clean(inputService.InputBegan:Connect(function(inputObj)
 end))
 
 return mainapi
+

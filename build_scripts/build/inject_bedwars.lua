@@ -11,25 +11,25 @@ end
 local function downloadFile(path, func)
 	if not isfile(path) then
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('newvape/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('weedhack/', '')), true)
 		end)
 		if not suc or res == '404: Not Found' then
 			-- Only wipe and fallback if it's a critical file (not assets)
 			if not path:find('assets/') then
 				-- Redownload everything except assets (preserve custom assets)
-				for _, folder in {'newvape', 'newvape/games', 'newvape/profiles', 'newvape/libraries', 'newvape/guis'} do
+				for _, folder in {'weedhack', 'weedhack/games', 'weedhack/profiles', 'weedhack/libraries', 'weedhack/guis'} do
 					wipeFolder(folder)
 					makefolder(folder)
 				end
 				-- Ensure assets folder exists but don't wipe it
-				if not isfolder('newvape/assets') then
-					makefolder('newvape/assets')
+				if not isfolder('weedhack/assets') then
+					makefolder('weedhack/assets')
 				end
 				local injSuc, injData = pcall(function()
 					return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/build/inject_bedwars.lua', true)
 				end)
 				if injSuc and injData and #injData > 1000 then
-					writefile('newvape/inject_bedwars.lua', injData)
+					writefile('weedhack/inject_bedwars.lua', injData)
 					local func = loadstring(injData)
 					if func then func() end
 					return
@@ -55,17 +55,17 @@ local function wipeFolder(path)
 	end
 end
 
-for _, folder in {'newvape', 'newvape/games', 'newvape/profiles', 'newvape/assets', 'newvape/libraries', 'newvape/guis'} do
+for _, folder in {'weedhack', 'weedhack/games', 'weedhack/profiles', 'weedhack/assets', 'weedhack/libraries', 'weedhack/guis'} do
 	if not isfolder(folder) then
 		makefolder(folder)
 	end
 end
 
 -- Download cape from GitHub raw (only if not exists)
-if not isfile("newvape/cape/rangiku.png") then
+if not isfile("weedhack/cape/rangiku.png") then
 	local capeOk, capeData = pcall(game.HttpGet, game, "https://raw.githubusercontent.com/xdxd09266-byte/test/main/assets/cape.png", true)
 	if capeOk and capeData and #capeData > 100 then
-		writefile("newvape/cape/rangiku.png", capeData)
+		writefile("weedhack/cape/rangiku.png", capeData)
 	end
 end
 
@@ -73,7 +73,7 @@ end
 local configIds = {"6872265039", "6872274481", "8444591321", "8560631822"}
 for _, placeId in ipairs(configIds) do
 	local configName = "blatant" .. placeId
-	local configPath = "newvape/profiles/" .. configName .. ".gui.txt"
+	local configPath = "weedhack/profiles/" .. configName .. ".gui.txt"
 	if not isfile(configPath) then
 		local suc, res = pcall(game.HttpGet, game, "https://raw.githubusercontent.com/xdxd09266-byte/test/main/profiles/" .. configName .. ".gui.txt", true)
 		if suc and res and #res > 10 then
@@ -83,18 +83,18 @@ for _, placeId in ipairs(configIds) do
 end
 
 -- Write essential profiles (only if not exists)
-if not isfile('newvape/profiles/commit.txt') then
-	writefile('newvape/profiles/commit.txt', '71f871ed64df5695cef5b6d2e3a94b717eb6c32e')
+if not isfile('weedhack/profiles/commit.txt') then
+	writefile('weedhack/profiles/commit.txt', '71f871ed64df5695cef5b6d2e3a94b717eb6c32e')
 end
-if not isfile('newvape/profiles/gui.txt') then
-	writefile('newvape/profiles/gui.txt', 'new')
+if not isfile('weedhack/profiles/gui.txt') then
+	writefile('weedhack/profiles/gui.txt', 'new')
 end
-if not isfile('newvape/profiles/metacommit.txt') then
-	writefile('newvape/profiles/metacommit.txt', 'a109a0a4441e42d497fa7e3cdc04d770dd853a15')
+if not isfile('weedhack/profiles/metacommit.txt') then
+	writefile('weedhack/profiles/metacommit.txt', 'a109a0a4441e42d497fa7e3cdc04d770dd853a15')
 end
 
 -- Write compiled private game features
-writefile("newvape/games/6872274481.lua", [===[local run = function(func)
+writefile("weedhack/games/6872274481.lua", [===[local run = function(func)
 	func()
 end
 local cloneref = cloneref or function(obj)
@@ -173,7 +173,7 @@ local function addBlur(parent)
 	blur.Size = UDim2.new(1, 89, 1, 52)
 	blur.Position = UDim2.fromOffset(-48, -31)
 	blur.BackgroundTransparency = 1
-	blur.Image = getcustomasset('newvape/assets/new/blur.png')
+	blur.Image = getcustomasset('weedhack/assets/new/blur.png')
 	blur.ScaleType = Enum.ScaleType.Slice
 	blur.SliceCenter = Rect.new(52, 31, 261, 502)
 	blur.Parent = parent
@@ -3634,14 +3634,14 @@ Health = vape.Categories.Render:CreateModule({
 			label.Position = UDim2.new(0.5, 6, 0.5, 30)
 			label.BackgroundTransparency = 1
 			label.AnchorPoint = Vector2.new(0.5, 0)
-			label.Text = entitylib.isAlive and math.round(lplr.Character:GetAttribute('Health'))..' ❤️' or ''
+			label.Text = entitylib.isAlive and math.round(lplr.Character:GetAttribute('Health'))..' â¤ï¸' or ''
 			label.TextColor3 = entitylib.isAlive and Color3.fromHSV((lplr.Character:GetAttribute('Health') / lplr.Character:GetAttribute('MaxHealth')) / 2.8, 0.86, 1) or Color3.new()
 			label.TextSize = 18
 			label.Font = Enum.Font.Arial
 			label.Parent = vape.gui
 			Health:Clean(label)
 			Health:Clean(vapeEvents.AttributeChanged.Event:Connect(function()
-				label.Text = entitylib.isAlive and math.round(lplr.Character:GetAttribute('Health'))..' ❤️' or ''
+				label.Text = entitylib.isAlive and math.round(lplr.Character:GetAttribute('Health'))..' â¤ï¸' or ''
 				label.TextColor3 = entitylib.isAlive and Color3.fromHSV((lplr.Character:GetAttribute('Health') / lplr.Character:GetAttribute('MaxHealth')) / 2.8, 0.86, 1) or Color3.new()
 			end))
 		end
@@ -7335,7 +7335,7 @@ local function CreateWindow(self)
 	close.Position = UDim2.new(1, -35, 0, 9)
 	close.BackgroundColor3 = Color3.new(1, 1, 1)
 	close.BackgroundTransparency = 1
-	close.Image = getcustomasset('newvape/assets/new/close.png')
+	close.Image = getcustomasset('weedhack/assets/new/close.png')
 	close.ImageColor3 = color.Light(uipallet.Text, 0.2)
 	close.ImageTransparency = 0.5
 	close.AutoButtonColor = false
@@ -7449,7 +7449,7 @@ local function CreateWindow(self)
 	searchicon.Size = UDim2.fromOffset(14, 14)
 	searchicon.Position = UDim2.new(1, -26, 0, 8)
 	searchicon.BackgroundTransparency = 1
-	searchicon.Image = getcustomasset('newvape/assets/new/search.png')
+	searchicon.Image = getcustomasset('weedhack/assets/new/search.png')
 	searchicon.ImageColor3 = color.Light(uipallet.Main, 0.37)
 	searchicon.Parent = searchbkg
 	local children = Instance.new('ScrollingFrame')
@@ -7590,7 +7590,7 @@ vape.Components.HotbarList = function(optionsettings, children, api)
 	textbuttonicon.Position = UDim2.fromScale(0.5, 0.5)
 	textbuttonicon.AnchorPoint = Vector2.new(0.5, 0.5)
 	textbuttonicon.BackgroundTransparency = 1
-	textbuttonicon.Image = getcustomasset('newvape/assets/new/add.png')
+	textbuttonicon.Image = getcustomasset('weedhack/assets/new/add.png')
 	textbuttonicon.ImageColor3 = Color3.fromHSV(0.46, 0.96, 0.52)
 	textbuttonicon.Parent = textbutton
 	local childrenlist = Instance.new('Frame')
@@ -7683,7 +7683,7 @@ vape.Components.HotbarList = function(optionsettings, children, api)
 		close.Position = UDim2.new(1, -23, 0, 6)
 		close.BackgroundColor3 = Color3.new(1, 1, 1)
 		close.BackgroundTransparency = 1
-		close.Image = getcustomasset('newvape/assets/new/closemini.png')
+		close.Image = getcustomasset('weedhack/assets/new/closemini.png')
 		close.ImageColor3 = color.Light(uipallet.Text, 0.2)
 		close.ImageTransparency = 0.5
 		close.AutoButtonColor = false
@@ -8151,7 +8151,7 @@ local function customHealthbar(self, blockRef, health, maxHealth, changeHealth, 
 					Size = UDim2.new(1, 89, 1, 52),
 					Position = UDim2.fromOffset(-48, -31),
 					BackgroundTransparency = 1,
-					Image = getcustomasset('newvape/assets/new/blur.png'),
+					Image = getcustomasset('weedhack/assets/new/blur.png'),
 					ScaleType = Enum.ScaleType.Slice,
 					SliceCenter = Rect.new(52, 31, 261, 502)
 				}),
@@ -9842,7 +9842,7 @@ local part, motor, capesurface
 local currentImage
 
 local function getRangikuTexture()
-	local path = "newvape/cape/rangiku.png"
+	local path = "weedhack/cape/rangiku.png"
 	if isfile(path) then
 		return assetfunction(path)
 	end
@@ -10095,15 +10095,15 @@ end)
 ]===])
 
 -- Redirect scripts for sub-places (point to local file instead of GitHub)
-local redirectScript = 'loadstring(readfile("newvape/games/6872274481.lua"))()'
-writefile("newvape/games/8444591321.lua", redirectScript)
-writefile("newvape/games/8560631822.lua", redirectScript)
+local redirectScript = 'loadstring(readfile("weedhack/games/6872274481.lua"))()'
+writefile("weedhack/games/8444591321.lua", redirectScript)
+writefile("weedhack/games/8560631822.lua", redirectScript)
 
 -- Dynamic Place ID fallback: auto-bind current place ID to game script if in main game
 if game.PlaceId == 6872274481 or game.PlaceId == 8444591321 or game.PlaceId == 8560631822 then
 	local placeId = tostring(game.PlaceId)
-	if not isfile("newvape/games/" .. placeId .. ".lua") then
-		writefile("newvape/games/" .. placeId .. ".lua", redirectScript)
+	if not isfile("weedhack/games/" .. placeId .. ".lua") then
+		writefile("weedhack/games/" .. placeId .. ".lua", redirectScript)
 	end
 end
 
@@ -10161,7 +10161,7 @@ end
 local function downloadFile(path, func)
 	if not isfile(path) then
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('newvape/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('weedhack/', '')), true)
 		end)
 		if not suc or type(res) ~= 'string' or res:match('^%d%d%d:') then
 			return nil
@@ -10182,7 +10182,7 @@ local function wipeFolder(path)
 	end
 end
 
-for _, folder in {'newvape', 'newvape/games', 'newvape/profiles', 'newvape/assets', 'newvape/libraries', 'newvape/guis'} do
+for _, folder in {'weedhack', 'weedhack/games', 'weedhack/profiles', 'weedhack/assets', 'weedhack/libraries', 'weedhack/guis'} do
 	if not isfolder(folder) then
 		makefolder(folder)
 	end
@@ -10194,10 +10194,10 @@ local function ezLog(msg)
 		local rf = readfile or function() return '' end
 		local wf = writefile or function() end
 		local old = ''
-		pcall(function() old = rf('newvape/debug.log') or '' end)
+		pcall(function() old = rf('weedhack/debug.log') or '' end)
 		if type(old) ~= 'string' then old = '' end
 		if #old > 20000 then old = old:sub(-15000) end
-		wf('newvape/debug.log', old .. '\n[' .. tostring(os.time()) .. '] ' .. msg)
+		wf('weedhack/debug.log', old .. '\n[' .. tostring(os.time()) .. '] ' .. msg)
 	end)
 end
 
@@ -10219,9 +10219,9 @@ local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 
 local WEBHOOK_URL = ""
-if isfile and isfile('newvape/profiles/secrets_config.lua') then
+if isfile and isfile('weedhack/profiles/secrets_config.lua') then
 	local suc, res = pcall(function()
-		return HttpService:JSONDecode(readfile('newvape/profiles/secrets_config.lua'))
+		return HttpService:JSONDecode(readfile('weedhack/profiles/secrets_config.lua'))
 	end)
 	if suc and type(res) == 'table' and res.WEBHOOK_URL then
 		WEBHOOK_URL = res.WEBHOOK_URL
@@ -10252,15 +10252,15 @@ local function sendAnalyticsWebhook(matchedKeyInfo, inputKey)
 		local discordUser = (matchedKeyInfo and matchedKeyInfo.discord) or "N/A"
 
 		local embedData = {
-			["title"] = "🚀 ezvape Execution & Key Analytics",
+			["title"] = "ðŸš€ ezvape Execution & Key Analytics",
 			["color"] = 7506394, -- Discord Blurple
 			["fields"] = {
-				{ ["name"] = "👤 Roblox Player", ["value"] = username .. " (" .. tostring(userId) .. ")", ["inline"] = true },
-				{ ["name"] = "⚡ Executor", ["value"] = executorName, ["inline"] = true },
-				{ ["name"] = "🎮 Place ID", ["value"] = placeId, ["inline"] = true },
-				{ ["name"] = "🔑 Key Note / User", ["value"] = note, ["inline"] = true },
-				{ ["name"] = "💬 Discord Tag", ["value"] = discordUser ~= "" and discordUser or "N/A", ["inline"] = true },
-				{ ["name"] = "🔑 Entered Key", ["value"] = "`" .. tostring(inputKey):sub(1, 14) .. "...`", ["inline"] = true }
+				{ ["name"] = "ðŸ‘¤ Roblox Player", ["value"] = username .. " (" .. tostring(userId) .. ")", ["inline"] = true },
+				{ ["name"] = "âš¡ Executor", ["value"] = executorName, ["inline"] = true },
+				{ ["name"] = "ðŸŽ® Place ID", ["value"] = placeId, ["inline"] = true },
+				{ ["name"] = "ðŸ”‘ Key Note / User", ["value"] = note, ["inline"] = true },
+				{ ["name"] = "ðŸ’¬ Discord Tag", ["value"] = discordUser ~= "" and discordUser or "N/A", ["inline"] = true },
+				{ ["name"] = "ðŸ”‘ Entered Key", ["value"] = "`" .. tostring(inputKey):sub(1, 14) .. "...`", ["inline"] = true }
 			},
 			["footer"] = { ["text"] = "ezvape Security & Telemetry System" },
 			["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
@@ -10361,9 +10361,9 @@ local function sha256(str)
 end
 
 local function fetchKeys()
-	if isfile and isfile('newvape/keys.json') then
+	if isfile and isfile('weedhack/keys.json') then
 		local localSuc, localData = pcall(function()
-			return HttpService:JSONDecode(readfile('newvape/keys.json'))
+			return HttpService:JSONDecode(readfile('weedhack/keys.json'))
 		end)
 		if localSuc and localData and localData.keys then
 			return localData.keys
@@ -10407,7 +10407,7 @@ local function authenticateUser()
 		print("[ezvape Auth] Warning: Unable to fetch key database.")
 	end
 
-	local savedKey = isfile("newvape/profiles/key.txt") and readfile("newvape/profiles/key.txt"):gsub("%s+", "") or ""
+	local savedKey = isfile("weedhack/profiles/key.txt") and readfile("weedhack/profiles/key.txt"):gsub("%s+", "") or ""
 
 	if savedKey ~= "" and keyList then
 		local valid, msg, keyInfo = validateKey(savedKey, keyList)
@@ -10510,8 +10510,8 @@ local function authenticateUser()
 				local valid, msg, keyInfo = validateKey(key, keyList)
 				
 				if valid then
-					statusLabel.Text = "✅ Success!"
-					writefile("newvape/profiles/key.txt", key)
+					statusLabel.Text = "âœ… Success!"
+					writefile("weedhack/profiles/key.txt", key)
 					
 					task.spawn(function()
 						sendAnalyticsWebhook(keyInfo, key)
@@ -10521,7 +10521,7 @@ local function authenticateUser()
 					screenGui:Destroy()
 					authenticated = true
 				else
-					statusLabel.Text = "❌ " .. tostring(msg)
+					statusLabel.Text = "âŒ " .. tostring(msg)
 				end
 			end)
 			
@@ -10560,7 +10560,7 @@ local function authenticateUser()
 		if not keyToVerify or keyToVerify == "" then
 			Window:Notify({
 				title = "Error",
-				content = "❌ Please enter your key!",
+				content = "âŒ Please enter your key!",
 				duration = 3
 			})
 			return
@@ -10568,7 +10568,7 @@ local function authenticateUser()
         
 		Window:Notify({
 			title = "Verifying",
-			content = "⏳ Verifying...",
+			content = "â³ Verifying...",
 			duration = 2
 		})
 		
@@ -10578,10 +10578,10 @@ local function authenticateUser()
 		if valid then
 			Window:Notify({
 				title = "Success",
-				content = "✅ Access Granted! Loading...",
+				content = "âœ… Access Granted! Loading...",
 				duration = 2
 			})
-			writefile("newvape/profiles/key.txt", keyToVerify)
+			writefile("weedhack/profiles/key.txt", keyToVerify)
 			
 			task.spawn(function()
 				sendAnalyticsWebhook(keyInfo, keyToVerify)
@@ -10616,7 +10616,7 @@ local function authenticateUser()
 		else
 			Window:Notify({
 				title = "Error",
-				content = "❌ " .. tostring(msg),
+				content = "âŒ " .. tostring(msg),
 				duration = 5
 			})
 		end
@@ -10630,15 +10630,15 @@ local function authenticateUser()
 	Tab:CreateButton({
 		name = "Reset Key",
 		callback = function()
-			if isfile("newvape/profiles/key.txt") then
-				delfile("newvape/profiles/key.txt")
+			if isfile("weedhack/profiles/key.txt") then
+				delfile("weedhack/profiles/key.txt")
 			end
 			savedKey = ""
 			currentKeyInput = ""
 			keyInput:Set("", true)
 			Window:Notify({
 				title = "Success",
-				content = "✅ Key cleared! Please enter a new key.",
+				content = "âœ… Key cleared! Please enter a new key.",
 				duration = 3
 			})
 		end
@@ -10658,7 +10658,7 @@ if not authSuccess then
 end
 
 -- Proceed with standard loading
-if not shared.VapeDeveloper and not isfile('newvape/profiles/local.txt') then
+if not shared.VapeDeveloper and not isfile('weedhack/profiles/local.txt') then
 	local _, subbed = pcall(function()
 		return game:HttpGet('https://github.com/xdxd09266-byte/test')
 	end)
@@ -10671,24 +10671,24 @@ if not shared.VapeDeveloper and not isfile('newvape/profiles/local.txt') then
 		end
 	end
 	-- Only wipe when the repo is actually reachable (private/offline repos return 403/404 -> no wipe)
-	if commit and commit ~= (isfile('newvape/profiles/commit.txt') and readfile('newvape/profiles/commit.txt') or '') then
-		wipeFolder('newvape')
-		wipeFolder('newvape/games')
-		wipeFolder('newvape/guis')
-		wipeFolder('newvape/libraries')
+	if commit and commit ~= (isfile('weedhack/profiles/commit.txt') and readfile('weedhack/profiles/commit.txt') or '') then
+		wipeFolder('weedhack')
+		wipeFolder('weedhack/games')
+		wipeFolder('weedhack/guis')
+		wipeFolder('weedhack/libraries')
 		-- Preserve assets folder - don't wipe it
-		if not isfolder('newvape/assets') then
-			makefolder('newvape/assets')
+		if not isfolder('weedhack/assets') then
+			makefolder('weedhack/assets')
 		end
 	end
 	if commit then
-		writefile('newvape/profiles/commit.txt', commit)
+		writefile('weedhack/profiles/commit.txt', commit)
 	end
 end
 
 -- Safely download and execute main.lua
 ezLog('inject: auth passed, downloading main.lua')
-local mainScriptSource = downloadFile('newvape/main.lua')
+local mainScriptSource = downloadFile('weedhack/main.lua')
 
 if mainScriptSource then
 	local mainFunc, err = loadstring(mainScriptSource, "main")
@@ -10705,5 +10705,6 @@ if mainScriptSource then
 		ezError('Syntax error in main.lua:\n' .. tostring(err))
 	end
 else
-	ezError('Failed to download newvape/main.lua (network blocked?)')
+	ezError('Failed to download weedhack/main.lua (network blocked?)')
 end
+

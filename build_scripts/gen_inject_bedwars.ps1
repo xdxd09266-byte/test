@@ -1,4 +1,4 @@
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+﻿$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $gameCompiledPath = "$PSScriptRoot\build\6872274481.lua"
 $outPath = "$PSScriptRoot\build\inject_bedwars.lua"
 
@@ -26,25 +26,25 @@ end
 local function downloadFile(path, func)
 	if not isfile(path) then
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('newvape/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('weedhack/', '')), true)
 		end)
 		if not suc or res == '404: Not Found' then
 			-- Only wipe and fallback if it's a critical file (not assets)
 			if not path:find('assets/') then
 				-- Redownload everything except assets (preserve custom assets)
-				for _, folder in {'newvape', 'newvape/games', 'newvape/profiles', 'newvape/libraries', 'newvape/guis'} do
+				for _, folder in {'weedhack', 'weedhack/games', 'weedhack/profiles', 'weedhack/libraries', 'weedhack/guis'} do
 					wipeFolder(folder)
 					makefolder(folder)
 				end
 				-- Ensure assets folder exists but don't wipe it
-				if not isfolder('newvape/assets') then
-					makefolder('newvape/assets')
+				if not isfolder('weedhack/assets') then
+					makefolder('weedhack/assets')
 				end
 				local injSuc, injData = pcall(function()
 					return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/build/inject_bedwars.lua', true)
 				end)
 				if injSuc and injData and #injData > 1000 then
-					writefile('newvape/inject_bedwars.lua', injData)
+					writefile('weedhack/inject_bedwars.lua', injData)
 					local func = loadstring(injData)
 					if func then func() end
 					return
@@ -70,17 +70,17 @@ local function wipeFolder(path)
 	end
 end
 
-for _, folder in {'newvape', 'newvape/games', 'newvape/profiles', 'newvape/assets', 'newvape/libraries', 'newvape/guis'} do
+for _, folder in {'weedhack', 'weedhack/games', 'weedhack/profiles', 'weedhack/assets', 'weedhack/libraries', 'weedhack/guis'} do
 	if not isfolder(folder) then
 		makefolder(folder)
 	end
 end
 
 -- Download cape from GitHub raw (only if not exists)
-if not isfile("newvape/cape/rangiku.png") then
+if not isfile("weedhack/cape/rangiku.png") then
 	local capeOk, capeData = pcall(game.HttpGet, game, "https://raw.githubusercontent.com/xdxd09266-byte/test/main/assets/cape.png", true)
 	if capeOk and capeData and #capeData > 100 then
-		writefile("newvape/cape/rangiku.png", capeData)
+		writefile("weedhack/cape/rangiku.png", capeData)
 	end
 end
 
@@ -88,7 +88,7 @@ end
 local configIds = {"6872265039", "6872274481", "8444591321", "8560631822"}
 for _, placeId in ipairs(configIds) do
 	local configName = "blatant" .. placeId
-	local configPath = "newvape/profiles/" .. configName .. ".gui.txt"
+	local configPath = "weedhack/profiles/" .. configName .. ".gui.txt"
 	if not isfile(configPath) then
 		local suc, res = pcall(game.HttpGet, game, "https://raw.githubusercontent.com/xdxd09266-byte/test/main/profiles/" .. configName .. ".gui.txt", true)
 		if suc and res and #res > 10 then
@@ -98,29 +98,29 @@ for _, placeId in ipairs(configIds) do
 end
 
 -- Write essential profiles (only if not exists)
-if not isfile('newvape/profiles/commit.txt') then
-	writefile('newvape/profiles/commit.txt', '71f871ed64df5695cef5b6d2e3a94b717eb6c32e')
+if not isfile('weedhack/profiles/commit.txt') then
+	writefile('weedhack/profiles/commit.txt', '71f871ed64df5695cef5b6d2e3a94b717eb6c32e')
 end
-if not isfile('newvape/profiles/gui.txt') then
-	writefile('newvape/profiles/gui.txt', 'new')
+if not isfile('weedhack/profiles/gui.txt') then
+	writefile('weedhack/profiles/gui.txt', 'new')
 end
-if not isfile('newvape/profiles/metacommit.txt') then
-	writefile('newvape/profiles/metacommit.txt', 'a109a0a4441e42d497fa7e3cdc04d770dd853a15')
+if not isfile('weedhack/profiles/metacommit.txt') then
+	writefile('weedhack/profiles/metacommit.txt', 'a109a0a4441e42d497fa7e3cdc04d770dd853a15')
 end
 
 -- Write compiled private game features
-writefile("newvape/games/6872274481.lua", [===[${gameCompiled}]===])
+writefile("weedhack/games/6872274481.lua", [===[${gameCompiled}]===])
 
 -- Redirect scripts for sub-places (point to local file instead of GitHub)
-local redirectScript = 'loadstring(readfile("newvape/games/6872274481.lua"))()'
-writefile("newvape/games/8444591321.lua", redirectScript)
-writefile("newvape/games/8560631822.lua", redirectScript)
+local redirectScript = 'loadstring(readfile("weedhack/games/6872274481.lua"))()'
+writefile("weedhack/games/8444591321.lua", redirectScript)
+writefile("weedhack/games/8560631822.lua", redirectScript)
 
 -- Dynamic Place ID fallback: auto-bind current place ID to game script if in main game
 if game.PlaceId == 6872274481 or game.PlaceId == 8444591321 or game.PlaceId == 8560631822 then
 	local placeId = tostring(game.PlaceId)
-	if not isfile("newvape/games/" .. placeId .. ".lua") then
-		writefile("newvape/games/" .. placeId .. ".lua", redirectScript)
+	if not isfile("weedhack/games/" .. placeId .. ".lua") then
+		writefile("weedhack/games/" .. placeId .. ".lua", redirectScript)
 	end
 end
 
@@ -135,4 +135,5 @@ $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText($outPath, $inject, $utf8NoBom)
 
 Write-Host "[+] Generated inject_bedwars.lua -> $outPath"
+
 

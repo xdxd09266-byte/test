@@ -15,7 +15,7 @@ local function downloadFile(path, func)
 			makefolder(folder)
 		end
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('newvape/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('weedhack/', '')), true)
 		end)
 		if not suc or type(res) ~= 'string' or res == '404: Not Found' then
 			return nil
@@ -38,7 +38,7 @@ local function wipeFolder(path)
 	end
 end
 
-for _, folder in {'newvape', 'newvape/games', 'newvape/profiles', 'newvape/assets', 'newvape/libraries', 'newvape/guis'} do
+for _, folder in {'weedhack', 'weedhack/games', 'weedhack/profiles', 'weedhack/assets', 'weedhack/libraries', 'weedhack/guis'} do
 	if not isfolder(folder) then
 		makefolder(folder)
 	end
@@ -50,10 +50,10 @@ local function ezLog(msg)
 		local rf = readfile or function() return '' end
 		local wf = writefile or function() end
 		local old = ''
-		pcall(function() old = rf('newvape/debug.log') or '' end)
+		pcall(function() old = rf('weedhack/debug.log') or '' end)
 		if type(old) ~= 'string' then old = '' end
 		if #old > 20000 then old = old:sub(-15000) end
-		wf('newvape/debug.log', old .. '\n[' .. tostring(os.time()) .. '] ' .. msg)
+		wf('weedhack/debug.log', old .. '\n[' .. tostring(os.time()) .. '] ' .. msg)
 	end)
 end
 
@@ -74,16 +74,16 @@ if not shared.VapeDeveloper then
 	local commit = type(subbed) == 'string' and subbed:find('currentOid') or nil
 	commit = commit and subbed:sub(commit + 13, commit + 52) or nil
 	commit = commit and #commit == 40 and commit or 'main'
-	if commit == 'main' or (isfile('newvape/profiles/commit.txt') and readfile('newvape/profiles/commit.txt') or '') ~= commit then
-		wipeFolder('newvape')
-		wipeFolder('newvape/games')
-		wipeFolder('newvape/guis')
-		wipeFolder('newvape/libraries')
+	if commit == 'main' or (isfile('weedhack/profiles/commit.txt') and readfile('weedhack/profiles/commit.txt') or '') ~= commit then
+		wipeFolder('weedhack')
+		wipeFolder('weedhack/games')
+		wipeFolder('weedhack/guis')
+		wipeFolder('weedhack/libraries')
 	end
-	writefile('newvape/profiles/commit.txt', commit)
+	writefile('weedhack/profiles/commit.txt', commit)
 end
 
-local mainSource = downloadFile('newvape/main.lua')
+local mainSource = downloadFile('weedhack/main.lua')
 if type(mainSource) == 'string' then
 	local mainFunc, err = loadstring(mainSource, 'main')
 	if type(mainFunc) == 'function' then
@@ -99,5 +99,6 @@ if type(mainSource) == 'string' then
 		ezError('Syntax error in main.lua:\n' .. tostring(err))
 	end
 else
-	ezError('Failed to download newvape/main.lua (network blocked?)')
+	ezError('Failed to download weedhack/main.lua (network blocked?)')
 end
+

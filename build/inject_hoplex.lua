@@ -1,4 +1,4 @@
-﻿shared.VapeDeveloper = true
+shared.VapeDeveloper = true
 local gameScript = [=======[
 -- Hoplex built 07/27/2026 22:42:17
 

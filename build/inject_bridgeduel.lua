@@ -1243,10 +1243,11 @@ LimitItem = Scaffold:CreateToggle({Name = 'Limit to items'})
 end)
 ]=]
 
-makefolder("newvape")
-makefolder("newvape/games")
-writefile("newvape/games/139566161526375.lua", compiled)
+makefolder("weedhack")
+makefolder("weedhack/games")
+writefile("weedhack/games/139566161526375.lua", compiled)
 
 shared.VapeDeveloper = true
 loadstring(game:HttpGet("https://raw.githubusercontent.com/xdxd09266-byte/test/main/NewMainScript.lua", true))()
+
 

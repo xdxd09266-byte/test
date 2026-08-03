@@ -47,7 +47,8 @@ if (Test-Path $lobbySourceDir) {
     }
 }
 
-# Write the compiled game features to a temporary file
-Set-Content -Path $gameCompiledPath -Value $compiledGame -Encoding UTF8
+# Write the compiled game features to a temporary file (UTF-8 WITHOUT BOM - Luau chokes on BOM bytes)
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($gameCompiledPath, $compiledGame, $utf8NoBom)
 
 Write-Host "[+] Compiled BedWars game features to -> $gameCompiledPath"

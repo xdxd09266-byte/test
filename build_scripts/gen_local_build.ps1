@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Definition)
 $outDir = Join-Path $root 'build'
 $outPath = Join-Path $outDir 'ezvape_local.lua'
@@ -15,13 +15,13 @@ function Get-LuaLongString([string]$content) {
 }
 
 $files = @(
-	@('newvape/NewMainScript.lua', "$root\NewMainScript.lua"),
-	@('newvape/main.lua', "$root\main.lua"),
-	@('newvape/loader.lua', "$root\loader.lua"),
-	@('newvape/guis/new.lua', "$root\guis\new.lua"),
-	@('newvape/games/universal.lua', "$root\games\universal.lua"),
-	@('newvape/games/6872274481.lua', "$root\build_scripts\build\6872274481.lua"),
-	@('newvape/keys.json', "$root\keys.json")
+	@('weedhack/NewMainScript.lua', "$root\NewMainScript.lua"),
+	@('weedhack/main.lua', "$root\main.lua"),
+	@('weedhack/loader.lua', "$root\loader.lua"),
+	@('weedhack/guis/new.lua', "$root\guis\new.lua"),
+	@('weedhack/games/universal.lua', "$root\games\universal.lua"),
+	@('weedhack/games/6872274481.lua', "$root\build_scripts\build\6872274481.lua"),
+	@('weedhack/keys.json', "$root\keys.json")
 )
 
 $assets = Get-ChildItem "$root\assets\new" -File | Where-Object { $_.Length -le 120000 }
@@ -40,7 +40,7 @@ $out.Add('}')
 $out.Add('local __assets = {')
 foreach ($a in $assets) {
 	$b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes($a.FullName))
-	$out.Add("	['newvape/assets/new/$($a.Name)'] = " + (Get-LuaLongString $b64) + ',')
+	$out.Add("	['weedhack/assets/new/$($a.Name)'] = " + (Get-LuaLongString $b64) + ',')
 }
 $out.Add('}')
 $out.Add('')
@@ -62,13 +62,13 @@ $out.Add('		end')
 $out.Add('	end)')
 $out.Add('end')
 $out.Add('pcall(function()')
-$out.Add('	if not isfolder("newvape/profiles") then makefolder("newvape/profiles") end')
-$out.Add('	writefile("newvape/profiles/local.txt", "")')
-$out.Add('	writefile("newvape/profiles/key.txt", "ezvape-local-key")')
+$out.Add('	if not isfolder("weedhack/profiles") then makefolder("weedhack/profiles") end')
+$out.Add('	writefile("weedhack/profiles/local.txt", "")')
+$out.Add('	writefile("weedhack/profiles/key.txt", "ezvape-local-key")')
 $out.Add('end)')
 $out.Add('print("[ezvape-local] files ready, starting...")')
 $out.Add('local ok, err = pcall(function()')
-$out.Add('	local chunk, err2 = loadstring(readfile("newvape/NewMainScript.lua"), "ezvape-local")')
+$out.Add('	local chunk, err2 = loadstring(readfile("weedhack/NewMainScript.lua"), "ezvape-local")')
 $out.Add('	if not chunk then error(err2) end')
 $out.Add('	chunk()')
 $out.Add('end)')
@@ -83,3 +83,4 @@ $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 $bytes = [IO.File]::ReadAllBytes($outPath)
 Write-Host "[+] Generated local build: $outPath"
 Write-Host "    size: $($bytes.Length) bytes ($([Math]::Round($bytes.Length / 1024, 1)) KB)  files: $($files.Count)  assets: $($assets.Count)"
+

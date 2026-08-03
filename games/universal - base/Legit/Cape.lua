@@ -3,7 +3,7 @@ local part, motor, capesurface
 local currentImage
 
 local function getRangikuTexture()
-	local path = "newvape/cape/rangiku.png"
+	local path = "weedhack/cape/rangiku.png"
 	if isfile(path) then
 		return assetfunction(path)
 	end
@@ -132,3 +132,4 @@ Texture = Cape:CreateTextBox({
 		end
 	end
 })
+

@@ -1187,7 +1187,7 @@ OreNuker = vape.Categories.World:CreateModule({
 						if ok then
 							block:Destroy()
 						else
-							-- server rejected (no pickaxe / truly unbreakable) — put back
+							-- server rejected (no pickaxe / truly unbreakable) â€” put back
 							if block and block.Parent == replicatedStorage then
 								block.Parent = workspace.World
 							end
@@ -1229,16 +1229,16 @@ TargetPlayerBlocks = OreNuker:CreateToggle({ Name = 'Player blocks', Tooltip = '
 ]=]
 
 -- Write compiled game file to vape filesystem for both main arena and bridge duels
-writefile("newvape/games/77790193039862.lua", compiled)
-writefile("newvape/games/80041634734121.lua", [[
+writefile("weedhack/games/77790193039862.lua", compiled)
+writefile("weedhack/games/80041634734121.lua", [[
 local vape = shared.vape
 local isfile = isfile or function(file)
 	local suc, res = pcall(function() return readfile(file) end)
 	return suc and res ~= nil and res ~= ''
 end
 vape.Place = 77790193039862
-if isfile('newvape/games/'..vape.Place..'.lua') then
-	loadstring(readfile('newvape/games/'..vape.Place..'.lua'), '1.8arena')()
+if isfile('weedhack/games/'..vape.Place..'.lua') then
+	loadstring(readfile('weedhack/games/'..vape.Place..'.lua'), '1.8arena')()
 end
 ]])
 print("[Vape] Custom game files written for main arena and duels!")
@@ -1246,3 +1246,4 @@ print("[Vape] Custom game files written for main arena and duels!")
 -- Load vape in developer mode (skips github download, uses local files above)
 shared.VapeDeveloper = true
 loadstring(game:HttpGet("https://raw.githubusercontent.com/xdxd09266-byte/test/main/NewMainScript.lua", true))()
+

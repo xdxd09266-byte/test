@@ -33,7 +33,7 @@ local title = Instance.new('TextLabel')
 title.Name = 'Title'
 title.Size = UDim2.new(1, 0, 0, 29)
 title.BackgroundTransparency = 1
-title.Text = '         '..optionsettings.Name..' - '..optionapi.Value
+title.Text = 'â€Šâ€Šâ€Šâ€Šâ€Šâ€Šâ€Šâ€Šâ€Š'..optionsettings.Name..' - '..optionapi.Value
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.TextColor3 = color.Dark(uipallet.Text, 0.16)
 title.TextSize = 13
@@ -46,7 +46,7 @@ arrow.Name = 'Arrow'
 arrow.Size = UDim2.fromOffset(4, 8)
 arrow.Position = UDim2.new(1, -17, 0, 11)
 arrow.BackgroundTransparency = 1
-arrow.Image = getcustomasset('newvape/assets/new/expandright.png')
+arrow.Image = getcustomasset('weedhack/assets/new/expandright.png')
 arrow.ImageColor3 = Color3.fromRGB(140, 140, 140)
 arrow.Rotation = 90
 arrow.Parent = button
@@ -72,7 +72,7 @@ end
 
 function optionapi:SetValue(val, mouse)
 	self.Value = table.find(optionsettings.List, val) and val or optionsettings.List[1] or 'None'
-	title.Text = '         '..optionsettings.Name..' - '..self.Value
+	title.Text = 'â€Šâ€Šâ€Šâ€Šâ€Šâ€Šâ€Šâ€Šâ€Š'..optionsettings.Name..' - '..self.Value
 	if dropdownchildren then
 		arrow.Rotation = 90
 		dropdownchildren:Destroy()
@@ -102,7 +102,7 @@ button.MouseButton1Click:Connect(function()
 			dropdownoption.BackgroundColor3 = uipallet.Main
 			dropdownoption.BorderSizePixel = 0
 			dropdownoption.AutoButtonColor = false
-			dropdownoption.Text = '         '..v
+			dropdownoption.Text = 'â€Šâ€Šâ€Šâ€Šâ€Šâ€Šâ€Šâ€Šâ€Š'..v
 			dropdownoption.TextXAlignment = Enum.TextXAlignment.Left
 			dropdownoption.TextColor3 = color.Dark(uipallet.Text, 0.16)
 			dropdownoption.TextSize = 13

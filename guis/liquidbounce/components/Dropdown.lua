@@ -31,7 +31,7 @@ title.Name = 'Title'
 title.Size = UDim2.new(1, -10, 0, 27)
 title.Position = UDim2.fromOffset(10, 0)
 title.BackgroundTransparency = 1
-title.Text = optionsettings.Name..' · '..optionapi.Value
+title.Text = optionsettings.Name..' Â· '..optionapi.Value
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.TextColor3 = uipallet.Text
 title.TextSize = 14
@@ -43,7 +43,7 @@ dropdownexpand.Size = UDim2.fromOffset(6, 10)
 dropdownexpand.Position = UDim2.new(1, -15, 0, 14)
 dropdownexpand.AnchorPoint = Vector2.new(0.5, 0.5)
 dropdownexpand.BackgroundTransparency = 1
-dropdownexpand.Image = getcustomasset('newvape/assets/liquidbounce/expand.png')
+dropdownexpand.Image = getcustomasset('weedhack/assets/liquidbounce/expand.png')
 dropdownexpand.Parent = button
 optionsettings.Function = optionsettings.Function or function() end
 local dropdownchildren
@@ -67,7 +67,7 @@ end
 
 function optionapi:SetValue(val, mouse)
 	self.Value = table.find(optionsettings.List, val) and val or optionsettings.List[1] or 'None'
-	title.Text = optionsettings.Name..' · '..self.Value
+	title.Text = optionsettings.Name..' Â· '..self.Value
 	if dropdownchildren then
 		dropdownchildren:Destroy()
 		dropdownchildren = nil

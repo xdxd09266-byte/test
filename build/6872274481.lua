@@ -1,4 +1,4 @@
-﻿local run = function(func)
+local run = function(func)
 	func()
 end
 local cloneref = cloneref or function(obj)
@@ -77,7 +77,7 @@ local function addBlur(parent)
 	blur.Size = UDim2.new(1, 89, 1, 52)
 	blur.Position = UDim2.fromOffset(-48, -31)
 	blur.BackgroundTransparency = 1
-	blur.Image = getcustomasset('newvape/assets/new/blur.png')
+	blur.Image = getcustomasset('weedhack/assets/new/blur.png')
 	blur.ScaleType = Enum.ScaleType.Slice
 	blur.SliceCenter = Rect.new(52, 31, 261, 502)
 	blur.Parent = parent
@@ -1206,6 +1206,7 @@ end)
 for _, v in {'AntiRagdoll', 'TriggerBot', 'SilentAim', 'AutoRejoin', 'Rejoin', 'Disabler', 'Timer', 'ServerHop', 'MouseTP', 'MurderMystery'} do
 	vape:Remove(v)
 end
+
 
 run(function()
 local AimAssist
@@ -2952,22 +2953,12 @@ run(function()
 						entitylib.character.RootPart.CFrame = CFrame.lookAt(entitylib.character.RootPart.Position, Vector3.new(vec.X, entitylib.character.RootPart.Position.Y + 0.001, vec.Z))
 					end
 
-					if #attacked == 0 and hitCounter > 0 and (tick() - lastHitTick) > 1.5 then
+					if #attacked == 0 and hitCounter > 0 and (tick() - lastHitTick) > 0.5 then
 						hitCounter = 0
 					end
 					if #attacked > 0 then
 						lastHitTick = tick()
-						local extra
-						if hitCounter > 28 then
-							extra = 0.1
-						elseif hitCounter > 20 then
-							extra = 0.06
-						elseif hitCounter > 12 then
-							extra = 0.03
-						else
-							extra = 0
-						end
-						task.wait(#attacked * 0.02 + extra + math.random() * 0.005)
+						task.wait(math.clamp(1 / UpdateRate.Value, 0.001, 0.05) + math.random() * 0.002)
 					else
 						task.wait(1 / UpdateRate.Value)
 					end
@@ -6355,6 +6346,10 @@ Skywars = ChestSteal:CreateToggle({
 end)
 
 run(function()
+
+end)
+
+run(function()
 local Schematica
 local File
 local Mode
@@ -7239,7 +7234,7 @@ local function CreateWindow(self)
 	close.Position = UDim2.new(1, -35, 0, 9)
 	close.BackgroundColor3 = Color3.new(1, 1, 1)
 	close.BackgroundTransparency = 1
-	close.Image = getcustomasset('newvape/assets/new/close.png')
+	close.Image = getcustomasset('weedhack/assets/new/close.png')
 	close.ImageColor3 = color.Light(uipallet.Text, 0.2)
 	close.ImageTransparency = 0.5
 	close.AutoButtonColor = false
@@ -7353,7 +7348,7 @@ local function CreateWindow(self)
 	searchicon.Size = UDim2.fromOffset(14, 14)
 	searchicon.Position = UDim2.new(1, -26, 0, 8)
 	searchicon.BackgroundTransparency = 1
-	searchicon.Image = getcustomasset('newvape/assets/new/search.png')
+	searchicon.Image = getcustomasset('weedhack/assets/new/search.png')
 	searchicon.ImageColor3 = color.Light(uipallet.Main, 0.37)
 	searchicon.Parent = searchbkg
 	local children = Instance.new('ScrollingFrame')
@@ -7494,7 +7489,7 @@ vape.Components.HotbarList = function(optionsettings, children, api)
 	textbuttonicon.Position = UDim2.fromScale(0.5, 0.5)
 	textbuttonicon.AnchorPoint = Vector2.new(0.5, 0.5)
 	textbuttonicon.BackgroundTransparency = 1
-	textbuttonicon.Image = getcustomasset('newvape/assets/new/add.png')
+	textbuttonicon.Image = getcustomasset('weedhack/assets/new/add.png')
 	textbuttonicon.ImageColor3 = Color3.fromHSV(0.46, 0.96, 0.52)
 	textbuttonicon.Parent = textbutton
 	local childrenlist = Instance.new('Frame')
@@ -7587,7 +7582,7 @@ vape.Components.HotbarList = function(optionsettings, children, api)
 		close.Position = UDim2.new(1, -23, 0, 6)
 		close.BackgroundColor3 = Color3.new(1, 1, 1)
 		close.BackgroundTransparency = 1
-		close.Image = getcustomasset('newvape/assets/new/closemini.png')
+		close.Image = getcustomasset('weedhack/assets/new/closemini.png')
 		close.ImageColor3 = color.Light(uipallet.Text, 0.2)
 		close.ImageTransparency = 0.5
 		close.AutoButtonColor = false
@@ -7768,6 +7763,7 @@ Mode = AutoHotbar:CreateDropdown({
 })
 Clear = AutoHotbar:CreateToggle({Name = 'Clear Hotbar'})
 List = AutoHotbar:CreateHotbarList({})
+
 end)
 
 run(function()
@@ -8055,7 +8051,7 @@ local function customHealthbar(self, blockRef, health, maxHealth, changeHealth, 
 					Size = UDim2.new(1, 89, 1, 52),
 					Position = UDim2.fromOffset(-48, -31),
 					BackgroundTransparency = 1,
-					Image = getcustomasset('newvape/assets/new/blur.png'),
+					Image = getcustomasset('weedhack/assets/new/blur.png'),
 					ScaleType = Enum.ScaleType.Slice,
 					SliceCenter = Rect.new(52, 31, 261, 502)
 				}),
@@ -8316,6 +8312,7 @@ AutoToolToggle = Breaker:CreateToggle({
 	Name = 'Auto Tool',
 	Tooltip = 'Automatically selects the correct tool'
 })
+
 end)
 
 run(function()
@@ -9746,7 +9743,7 @@ local part, motor, capesurface
 local currentImage
 
 local function getRangikuTexture()
-	local path = "newvape/cape/rangiku.png"
+	local path = "weedhack/cape/rangiku.png"
 	if isfile(path) then
 		return assetfunction(path)
 	end
@@ -9876,6 +9873,7 @@ Texture = Cape:CreateTextBox({
 	end
 })
 
+
 end)
 
 run(function()
@@ -9995,4 +9993,3 @@ DarkMode = vape.Legit:CreateModule({
 })
 
 end)
-

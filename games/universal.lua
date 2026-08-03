@@ -14,7 +14,7 @@ end
 local function downloadFile(path, func)
 	if not isfile(path) then
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('newvape/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('weedhack/', '')), true)
 		end)
 		if not suc or res == '404: Not Found' then
 			error(res)
@@ -74,7 +74,7 @@ local function addBlur(parent)
 	blur.Size = UDim2.new(1, 89, 1, 52)
 	blur.Position = UDim2.fromOffset(-48, -31)
 	blur.BackgroundTransparency = 1
-	blur.Image = getcustomasset('newvape/assets/new/blur.png')
+	blur.Image = getcustomasset('weedhack/assets/new/blur.png')
 	blur.ScaleType = Enum.ScaleType.Slice
 	blur.SliceCenter = Rect.new(52, 31, 261, 502)
 	blur.Parent = parent
@@ -230,9 +230,9 @@ local function motorMove(target, cf)
 	task.delay(0, part.Destroy, part)
 end
 
-local hash = loadstring(downloadFile('newvape/libraries/hash.lua'), 'hash')()
-local prediction = loadstring(downloadFile('newvape/libraries/prediction.lua'), 'prediction')()
-entitylib = loadstring(downloadFile('newvape/libraries/entity.lua'), 'entitylibrary')()
+local hash = loadstring(downloadFile('weedhack/libraries/hash.lua'), 'hash')()
+local prediction = loadstring(downloadFile('weedhack/libraries/prediction.lua'), 'prediction')()
+entitylib = loadstring(downloadFile('weedhack/libraries/entity.lua'), 'entitylibrary')()
 local whitelist = {
 	alreadychecked = {},
 	customtags = {},
@@ -648,7 +648,7 @@ run(function()
 		if success then
 			return sendToast({
 				toastTitle = text,
-				iconImage = getcustomasset('newvape/assets/new/vape.png'),
+				iconImage = getcustomasset('weedhack/assets/new/vape.png'),
 				swipeUpDismiss = true,
 				onActivated = function() end
 			})
@@ -719,7 +719,7 @@ run(function()
 		iconframe.Parent = mainframe
 		local icon = Instance.new('ImageLabel')
 		icon.Size = UDim2.fromOffset(36, 36)
-		icon.Image = getcustomasset('newvape/assets/new/vape.png')
+		icon.Image = getcustomasset('weedhack/assets/new/vape.png')
 		icon.BackgroundTransparency = 1
 		icon.Parent = iconframe
 		constraint.MaxSize = Vector2.new(math.max(getfontsize(text, 20, textlabel.FontFace).X + 80, 600), math.huge)
@@ -755,7 +755,7 @@ run(function()
 
 		if not first or whitelist.textdata ~= whitelist.olddata then
 			if not first then
-				whitelist.olddata = isfile('newvape/profiles/whitelist.json') and readfile('newvape/profiles/whitelist.json') or nil
+				whitelist.olddata = isfile('weedhack/profiles/whitelist.json') and readfile('weedhack/profiles/whitelist.json') or nil
 			end
 
 			local suc, res = pcall(function()
@@ -799,7 +799,7 @@ run(function()
 				end
 				whitelist.olddata = whitelist.textdata
 				pcall(function()
-					writefile('newvape/profiles/whitelist.json', whitelist.textdata)
+					writefile('weedhack/profiles/whitelist.json', whitelist.textdata)
 				end)
 			end
 
@@ -3603,7 +3603,7 @@ run(function()
 		arrow.BackgroundTransparency = 1
 		arrow.BorderSizePixel = 0
 		arrow.Visible = false
-		arrow.Image = getcustomasset('newvape/assets/new/arrowmodule.png')
+		arrow.Image = getcustomasset('weedhack/assets/new/arrowmodule.png')
 		arrow.ImageColor3 = entitylib.getEntityColor(ent) or Color3.fromHSV(Color.Hue, Color.Sat, Color.Value)
 		arrow.Parent = Folder
 		Reference[ent] = arrow
@@ -4767,14 +4767,14 @@ run(function()
 				label.Position = UDim2.new(0.5, 6, 0.5, 30)
 				label.AnchorPoint = Vector2.new(0.5, 0)
 				label.BackgroundTransparency = 1
-				label.Text = '100 ❤️'
+				label.Text = '100 â¤ï¸'
 				label.TextSize = 18
 				label.Font = Enum.Font.Arial
 				label.Parent = vape.gui
 				Health:Clean(label)
 				
 				repeat
-					label.Text = entitylib.isAlive and math.round(entitylib.character.Humanoid.Health)..' ❤️' or ''
+					label.Text = entitylib.isAlive and math.round(entitylib.character.Humanoid.Health)..' â¤ï¸' or ''
 					label.TextColor3 = entitylib.isAlive and Color3.fromHSV((entitylib.character.Humanoid.Health / entitylib.character.Humanoid.MaxHealth) / 2.8, 0.86, 1) or Color3.new()
 					task.wait()
 				until not Health.Enabled
@@ -5376,7 +5376,7 @@ run(function()
 	
 	Radar = vape:CreateOverlay({
 		Name = 'Radar',
-		Icon = getcustomasset('newvape/assets/new/radaricon.png'),
+		Icon = getcustomasset('weedhack/assets/new/radaricon.png'),
 		Size = UDim2.fromOffset(14, 14),
 		Position = UDim2.fromOffset(12, 13),
 		Function = function(callback)
@@ -5597,7 +5597,7 @@ run(function()
 	
 	SessionInfo = vape:CreateOverlay({
 		Name = 'Session Info',
-		Icon = getcustomasset('newvape/assets/new/textguiicon.png'),
+		Icon = getcustomasset('weedhack/assets/new/textguiicon.png'),
 		Size = UDim2.fromOffset(16, 12),
 		Position = UDim2.fromOffset(12, 14),
 		Function = function(callback)
@@ -5667,8 +5667,8 @@ run(function()
 	Hide = SessionInfo:CreateTextList({
 		Name = 'Blacklist',
 		Tooltip = 'Name of entry to hide.',
-		Icon = getcustomasset('newvape/assets/new/blockedicon.png'),
-		Tab = getcustomasset('newvape/assets/new/blockedtab.png'),
+		Icon = getcustomasset('weedhack/assets/new/blockedicon.png'),
+		Tab = getcustomasset('weedhack/assets/new/blockedtab.png'),
 		TabSize = UDim2.fromOffset(21, 16),
 		Color = Color3.fromRGB(250, 50, 56)
 	})
@@ -7429,7 +7429,7 @@ run(function()
 	local currentImage
 	
 	local function getRangikuTexture()
-		local path = "newvape/cape/rangiku.png"
+		local path = "weedhack/cape/rangiku.png"
 		if isfile(path) then
 			return assetfunction(path)
 		end
@@ -7995,10 +7995,10 @@ run(function()
 		Name = 'Keystrokes',
 		Function = function(callback)
 			if callback then
-				createKeystroke(Enum.KeyCode.W, UDim2.new(0, 38, 0, 0), UDim2.new(0, 6, 0, 5), Style.Value == 'Arrow' and '↑' or nil)
-				createKeystroke(Enum.KeyCode.S, UDim2.new(0, 38, 0, 42), UDim2.new(0, 8, 0, 5), Style.Value == 'Arrow' and '↓' or nil)
-				createKeystroke(Enum.KeyCode.A, UDim2.new(0, 0, 0, 42), UDim2.new(0, 7, 0, 5), Style.Value == 'Arrow' and '←' or nil)
-				createKeystroke(Enum.KeyCode.D, UDim2.new(0, 76, 0, 42), UDim2.new(0, 8, 0, 5), Style.Value == 'Arrow' and '→' or nil)
+				createKeystroke(Enum.KeyCode.W, UDim2.new(0, 38, 0, 0), UDim2.new(0, 6, 0, 5), Style.Value == 'Arrow' and 'â†‘' or nil)
+				createKeystroke(Enum.KeyCode.S, UDim2.new(0, 38, 0, 42), UDim2.new(0, 8, 0, 5), Style.Value == 'Arrow' and 'â†“' or nil)
+				createKeystroke(Enum.KeyCode.A, UDim2.new(0, 0, 0, 42), UDim2.new(0, 7, 0, 5), Style.Value == 'Arrow' and 'â†' or nil)
+				createKeystroke(Enum.KeyCode.D, UDim2.new(0, 76, 0, 42), UDim2.new(0, 8, 0, 5), Style.Value == 'Arrow' and 'â†’' or nil)
 	
 				Keystrokes:Clean(inputService.InputBegan:Connect(updateKey))
 				Keystrokes:Clean(inputService.InputEnded:Connect(updateKey))
@@ -8358,3 +8358,4 @@ run(function()
 	})
 	
 end)
+

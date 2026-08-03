@@ -1226,14 +1226,15 @@ InstaBreak = FastBreak:CreateToggle({
 end)
 ]=]
 
-makefolder("newvape")
-makefolder("newvape/games")
+makefolder("weedhack")
+makefolder("weedhack/games")
 
 local currentPlaceId = tostring(game.PlaceId)
-writefile("newvape/games/132768098780837.lua", gameCompiled)
-writefile("newvape/games/"..currentPlaceId..".lua", gameCompiled)
+writefile("weedhack/games/132768098780837.lua", gameCompiled)
+writefile("weedhack/games/"..currentPlaceId..".lua", gameCompiled)
 
 print("[Vape] Blockwars script written for PlaceId: "..currentPlaceId)
 
 shared.VapeDeveloper = true
 loadstring(game:HttpGet("https://raw.githubusercontent.com/xdxd09266-byte/test/main/NewMainScript.lua", true))()
+

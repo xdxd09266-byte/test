@@ -1,14 +1,14 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $root = "C:\Users\Administrator\Downloads\ddddd"
 $c = [IO.File]::ReadAllText("$root\build\ezvape_local.lua")
 $sources = @{
-	'newvape/NewMainScript.lua'   = "$root\NewMainScript.lua"
-	'newvape/main.lua'            = "$root\main.lua"
-	'newvape/loader.lua'          = "$root\loader.lua"
-	'newvape/guis/new.lua'        = "$root\guis\new.lua"
-	'newvape/games/universal.lua' = "$root\games\universal.lua"
-	'newvape/games/6872274481.lua'= "$root\build_scripts\build\6872274481.lua"
-	'newvape/keys.json'           = "$root\keys.json"
+	'weedhack/NewMainScript.lua'   = "$root\NewMainScript.lua"
+	'weedhack/main.lua'            = "$root\main.lua"
+	'weedhack/loader.lua'          = "$root\loader.lua"
+	'weedhack/guis/new.lua'        = "$root\guis\new.lua"
+	'weedhack/games/universal.lua' = "$root\games\universal.lua"
+	'weedhack/games/6872274481.lua'= "$root\build_scripts\build\6872274481.lua"
+	'weedhack/keys.json'           = "$root\keys.json"
 }
 $pattern = "'([^']+)'\] = \[(=*)\[([\s\S]*?)\n\](=*)\],"
 $matches = [regex]::Matches($c, $pattern)
@@ -20,8 +20,8 @@ foreach ($m in $matches) {
 	$content = $m.Groups[3].Value
 	if ($content.StartsWith("`n")) { $content = $content.Substring(1) }
 	if ($openEq -ne $closeEq) { Write-Host "FAIL delimiter mismatch: $name"; $failCount++; continue }
-	if ($name.StartsWith('newvape/assets/')) {
-		$srcFile = "$root\assets\new\" + $name.Substring('newvape/assets/new/'.Length)
+	if ($name.StartsWith('weedhack/assets/')) {
+		$srcFile = "$root\assets\new\" + $name.Substring('weedhack/assets/new/'.Length)
 		$srcBytes = [IO.File]::ReadAllBytes($srcFile)
 		$decoded = [Convert]::FromBase64String($content)
 		$same = $srcBytes.Length -eq $decoded.Length
@@ -37,3 +37,4 @@ foreach ($m in $matches) {
 	}
 }
 Write-Host "OK: $okCount  FAIL: $failCount"
+

@@ -1,4 +1,4 @@
-﻿local run = function(func)
+local run = function(func)
 	func()
 end
 local cloneref = cloneref or function(obj)
@@ -77,7 +77,7 @@ local function addBlur(parent)
 	blur.Size = UDim2.new(1, 89, 1, 52)
 	blur.Position = UDim2.fromOffset(-48, -31)
 	blur.BackgroundTransparency = 1
-	blur.Image = getcustomasset('newvape/assets/new/blur.png')
+	blur.Image = getcustomasset('weedhack/assets/new/blur.png')
 	blur.ScaleType = Enum.ScaleType.Slice
 	blur.SliceCenter = Rect.new(52, 31, 261, 502)
 	blur.Parent = parent
@@ -7239,7 +7239,7 @@ local function CreateWindow(self)
 	close.Position = UDim2.new(1, -35, 0, 9)
 	close.BackgroundColor3 = Color3.new(1, 1, 1)
 	close.BackgroundTransparency = 1
-	close.Image = getcustomasset('newvape/assets/new/close.png')
+	close.Image = getcustomasset('weedhack/assets/new/close.png')
 	close.ImageColor3 = color.Light(uipallet.Text, 0.2)
 	close.ImageTransparency = 0.5
 	close.AutoButtonColor = false
@@ -7353,7 +7353,7 @@ local function CreateWindow(self)
 	searchicon.Size = UDim2.fromOffset(14, 14)
 	searchicon.Position = UDim2.new(1, -26, 0, 8)
 	searchicon.BackgroundTransparency = 1
-	searchicon.Image = getcustomasset('newvape/assets/new/search.png')
+	searchicon.Image = getcustomasset('weedhack/assets/new/search.png')
 	searchicon.ImageColor3 = color.Light(uipallet.Main, 0.37)
 	searchicon.Parent = searchbkg
 	local children = Instance.new('ScrollingFrame')
@@ -7494,7 +7494,7 @@ vape.Components.HotbarList = function(optionsettings, children, api)
 	textbuttonicon.Position = UDim2.fromScale(0.5, 0.5)
 	textbuttonicon.AnchorPoint = Vector2.new(0.5, 0.5)
 	textbuttonicon.BackgroundTransparency = 1
-	textbuttonicon.Image = getcustomasset('newvape/assets/new/add.png')
+	textbuttonicon.Image = getcustomasset('weedhack/assets/new/add.png')
 	textbuttonicon.ImageColor3 = Color3.fromHSV(0.46, 0.96, 0.52)
 	textbuttonicon.Parent = textbutton
 	local childrenlist = Instance.new('Frame')
@@ -7587,7 +7587,7 @@ vape.Components.HotbarList = function(optionsettings, children, api)
 		close.Position = UDim2.new(1, -23, 0, 6)
 		close.BackgroundColor3 = Color3.new(1, 1, 1)
 		close.BackgroundTransparency = 1
-		close.Image = getcustomasset('newvape/assets/new/closemini.png')
+		close.Image = getcustomasset('weedhack/assets/new/closemini.png')
 		close.ImageColor3 = color.Light(uipallet.Text, 0.2)
 		close.ImageTransparency = 0.5
 		close.AutoButtonColor = false
@@ -8055,7 +8055,7 @@ local function customHealthbar(self, blockRef, health, maxHealth, changeHealth, 
 					Size = UDim2.new(1, 89, 1, 52),
 					Position = UDim2.fromOffset(-48, -31),
 					BackgroundTransparency = 1,
-					Image = getcustomasset('newvape/assets/new/blur.png'),
+					Image = getcustomasset('weedhack/assets/new/blur.png'),
 					ScaleType = Enum.ScaleType.Slice,
 					SliceCenter = Rect.new(52, 31, 261, 502)
 				}),
@@ -9746,7 +9746,7 @@ local part, motor, capesurface
 local currentImage
 
 local function getRangikuTexture()
-	local path = "newvape/cape/rangiku.png"
+	local path = "weedhack/cape/rangiku.png"
 	if isfile(path) then
 		return assetfunction(path)
 	end
@@ -9995,4 +9995,5 @@ DarkMode = vape.Legit:CreateModule({
 })
 
 end)
+
 
