@@ -1,59 +1,45 @@
+-- ezvape universal loader
+-- completely standalone, replaces NewMainScript and main.lua
+
+local args = {...}
+if not game:IsLoaded() then game.Loaded:Wait() end
+if shared.vape then pcall(function() shared.vape:Uninject() end) end
+
+-- Developer mode on by default for now to prevent caching issues
+shared.VapeDeveloper = true
+
+-- Modern Executor Environment Normalization
+local getgenv = getgenv or function() return _G end
+local setthreadidentity = setthreadidentity or setidentity or set_thread_identity or function() end
+local cloneref = cloneref or function(obj) return obj end
+local playersService = cloneref(game:GetService('Players'))
+local lplr = playersService.LocalPlayer
+
+-- File System Stubs
+local readfile = readfile or function() return "" end
+local writefile = writefile or function() end
+local makefolder = makefolder or function() end
+local isfolder = isfolder or function() return false end
+local listfiles = listfiles or function() return {} end
+local delfile = delfile or function(f) writefile(f, '') end
 local isfile = isfile or function(file)
-	local suc, res = pcall(function()
-		return readfile(file)
-	end)
+	local suc, res = pcall(readfile, file)
 	return suc and res ~= nil and res ~= ''
 end
-local delfile = delfile or function(file)
-	writefile(file, '')
+
+-- Directory Setup
+for _, folder in ipairs({'weedhack', 'weedhack/profiles', 'weedhack/assets', 'weedhack/games', 'weedhack/guis', 'weedhack/libraries'}) do
+	if not isfolder(folder) then makefolder(folder) end
 end
 
-local function downloadFile(path, func)
-	if not isfile(path) then
-		local folder = path:match('^(.*)[/\\][^/\\]+$')
-		if folder and not isfolder(folder) then
-			makefolder(folder)
-		end
-		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..select(1, path:gsub('weedhack/', '')), true)
-		end)
-		if not suc or type(res) ~= 'string' or res == '404: Not Found' then
-			return nil
-		end
-		if path:find('.lua') then
-			res = '--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.\n'..res
-		end
-		writefile(path, res)
-	end
-	return (func or readfile)(path)
-end
-
-local function wipeFolder(path)
-	if not isfolder(path) then return end
-	for _, file in listfiles(path) do
-		if file:find('loader') then continue end
-		if isfile(file) and select(1, readfile(file):find('--This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.')) == 1 then
-			delfile(file)
-		end
-	end
-end
-
-for _, folder in {'weedhack', 'weedhack/games', 'weedhack/profiles', 'weedhack/assets', 'weedhack/libraries', 'weedhack/guis'} do
-	if not isfolder(folder) then
-		makefolder(folder)
-	end
-end
-
+-- Logging
 local function ezLog(msg)
 	print('[ezvape] ' .. tostring(msg))
 	pcall(function()
-		local rf = readfile or function() return '' end
-		local wf = writefile or function() end
-		local old = ''
-		pcall(function() old = rf('weedhack/debug.log') or '' end)
+		local old = isfile('weedhack/debug.log') and readfile('weedhack/debug.log') or ''
 		if type(old) ~= 'string' then old = '' end
 		if #old > 20000 then old = old:sub(-15000) end
-		wf('weedhack/debug.log', old .. '\n[' .. tostring(os.time()) .. '] ' .. msg)
+		writefile('weedhack/debug.log', old .. '\n[' .. tostring(os.time()) .. '] ' .. msg)
 	end)
 end
 
@@ -62,43 +48,168 @@ local function ezError(msg)
 	ezLog('[ERROR] ' .. tostring(msg))
 end
 
-local function ezSuccess(msg)
-	ezLog(msg)
-end
-
-local ezStatus = {}
-if not shared.VapeDeveloper then
-	local _, subbed = pcall(function()
-		return game:HttpGet('https://github.com/xdxd09266-byte/test')
-	end)
-	local commit = type(subbed) == 'string' and subbed:find('currentOid') or nil
-	commit = commit and subbed:sub(commit + 13, commit + 52) or nil
-	commit = commit and #commit == 40 and commit or 'main'
-	if commit == 'main' or (isfile('weedhack/profiles/commit.txt') and readfile('weedhack/profiles/commit.txt') or '') ~= commit then
-		wipeFolder('weedhack')
-		wipeFolder('weedhack/games')
-		wipeFolder('weedhack/guis')
-		wipeFolder('weedhack/libraries')
+-- Clean Corrupted Cache (BOM sweeps)
+-- This strips the UTF-8 BOM if it somehow sneaks in and breaks loadstring
+local function stripBOM(str)
+	if type(str) == "string" then
+		return (str:gsub("\239\187\191", ""))
 	end
-	writefile('weedhack/profiles/commit.txt', commit)
+	return str
 end
 
-local mainSource = downloadFile('weedhack/main.lua')
-if type(mainSource) == 'string' then
-	local mainFunc, err = loadstring(mainSource, 'main')
-	if type(mainFunc) == 'function' then
-		ezLog('loader: main.lua compiled, executing')
-		local ok, runtimeErr = pcall(mainFunc)
-		if not ok then
-			ezError('main.lua crashed:\n' .. tostring(runtimeErr))
-		else
-			ezLog('loader: main.lua finished without error')
-			ezSuccess('ezvape finished loading (teleport reload).\nOpen menu: top-right button (mobile) or RightShift (PC).')
+-- File Downloader
+local repoUrl = 'https://raw.githubusercontent.com/xdxd09266-byte/test/main/'
+local function downloadFile(path)
+    local localPath = path
+    local urlPath = path:gsub('^weedhack/', '')
+    
+    -- Force redownload if developer mode is on
+    if shared.VapeDeveloper and isfile(localPath) then
+        pcall(delfile, localPath)
+    end
+    
+	if not isfile(localPath) then
+		local folder = localPath:match('^(.*)[/\\][^/\\]+$')
+		if folder and not isfolder(folder) then makefolder(folder) end
+		
+		local suc, res = pcall(function()
+			return game:HttpGet(repoUrl .. urlPath .. '?t=' .. tostring(os.time()), true)
+		end)
+		
+		if not suc or type(res) ~= 'string' or res:match('^404') or res:match('^403') or res:match('^%d%d%d:') then
+			return nil
 		end
-	else
-		ezError('Syntax error in main.lua:\n' .. tostring(err))
+		
+		res = stripBOM(res)
+		
+		if localPath:find('%.lua$') then
+			res = '--[ezvape sync]\n' .. res
+		end
+		writefile(localPath, res)
 	end
-else
-	ezError('Failed to download weedhack/main.lua (network blocked?)')
+	
+	local content = readfile(localPath)
+	return stripBOM(content)
 end
 
+-- Safe Loadstring Protocol
+local original_loadstring = getgenv().loadstring or loadstring
+local function safe_loadstring(source, chunkname)
+	if type(source) ~= "string" then
+		return nil, "Expected string source, got " .. type(source)
+	end
+	source = stripBOM(source) -- one last check
+	local res, err = original_loadstring(source, chunkname)
+	if err then
+		ezError("Compile failed in " .. tostring(chunkname) .. ": " .. tostring(err))
+		if shared.vape and shared.vape.CreateNotification then
+			pcall(function() shared.vape:CreateNotification('Vape Error', 'Compile failed: '..tostring(err), 10, 'alert') end)
+		end
+	end
+	return res, err
+end
+
+-- Module Loader
+local function loadModule(path, chunkname, ...)
+    local source = downloadFile(path)
+    if type(source) == "string" then
+        local func, err = safe_loadstring(source, chunkname)
+        if func then
+            local success, result = pcall(func, ...)
+            if success then
+                return true, result
+            else
+                ezError("Execution error in " .. chunkname .. ": " .. tostring(result))
+                return false, result
+            end
+        end
+    else
+        ezLog("Failed to download or read module: " .. path)
+    end
+    return false, nil
+end
+
+-- Load GUI
+if not isfile('weedhack/profiles/gui.txt') then writefile('weedhack/profiles/gui.txt', 'new') end
+local guiName = readfile('weedhack/profiles/gui.txt') or 'new'
+if guiName == '' then guiName = 'new' end
+
+local guiSuccess, vapeInstance = loadModule('weedhack/guis/'..guiName..'.lua', guiName)
+if guiSuccess and vapeInstance then
+    shared.vape = vapeInstance
+    ezLog('GUI engine loaded: ' .. tostring(guiName))
+else
+    ezError('Critical: GUI engine failed to load!')
+    return
+end
+
+if not shared.VapeIndependent then
+	-- Universal Module
+	loadModule('weedhack/games/universal.lua', 'universal')
+
+	-- Place-Specific Game Script
+	local placeId = tostring(game.PlaceId)
+    
+    -- Local build override support (for fast dev without pushing to github)
+    local localGamePath = 'build/'..placeId..'.lua'
+    if isfile(localGamePath) then
+        local source = readfile(localGamePath)
+        source = stripBOM(source)
+        local func = safe_loadstring(source, placeId)
+        if func then
+            pcall(func, unpack(args))
+            ezLog('Loaded LOCAL BUILD for ' .. placeId)
+        end
+    else
+        -- Normal github loader
+	    local gameSuccess = loadModule('weedhack/games/'..placeId..'.lua', placeId, unpack(args))
+        if gameSuccess then
+            ezLog('Loaded cloud game module for ' .. placeId)
+        end
+    end
+
+    -- Finish Loading
+	if shared.vape then
+        shared.vape.Init = nil
+        ezLog('Initializing Vape UI & Module Loops...')
+        local loadOk, loadErr = pcall(function() shared.vape:Load() end)
+        if not loadOk then
+            ezError('vape:Load() crashed: ' .. tostring(loadErr))
+            return
+        end
+
+        -- Auto-Save
+        task.spawn(function()
+            repeat
+                task.wait(10)
+                if shared.vape and shared.vape.Loaded then
+                    pcall(function() shared.vape:Save() end)
+                end
+            until not (shared.vape and shared.vape.Loaded)
+        end)
+
+        -- Teleport Queue
+        if lplr then
+            shared.vape:Clean(lplr.OnTeleport:Connect(function()
+                if not shared.VapeIndependent then
+                    local teleportScript = [[
+                        shared.vapereload = true
+                        shared.VapeDeveloper = true
+                        loadstring(game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/loader.lua'))()
+                    ]]
+                    if queue_on_teleport then pcall(function() queue_on_teleport(teleportScript) end) end
+                end
+            end))
+        end
+
+        if not shared.vapereload then
+            pcall(function()
+                shared.vape:CreateNotification('ezvape Modern', 'Loaded successfully! Press button or RightShift.', 5)
+            end)
+        end
+    end
+else
+	if shared.vape then shared.vape.Init = function() end end
+end
+
+return shared.vape
