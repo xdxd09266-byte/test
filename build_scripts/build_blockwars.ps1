@@ -24,7 +24,7 @@ if (Test-Path $baseFile) {
 }
 
 # Then compile feature modules from both private and public directories
-$featureTypes = @("Blatant", "Legit", "Utility", "Visuals", "World")
+$featureTypes = @("Blatant", "Legit", "Utility", "Visuals", "World", "Minigames", "Inventory", "Combat", "Render")
 foreach ($type in $featureTypes) {
     # Public directory
     $publicFeatureDir = Join-Path $gameBaseDir $type
@@ -50,6 +50,11 @@ foreach ($type in $featureTypes) {
 # Write the compiled game features to a temporary file (UTF-8 WITHOUT BOM)
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText($gameCompiledPath, $compiledGame, $utf8NoBom)
+
+# Also write the deployed game file (served as weedhack/games/132768098780837.lua)
+$deployedGamePath = Join-Path $scriptDir "..\games\132768098780837.lua"
+[System.IO.File]::WriteAllText($deployedGamePath, $compiledGame, $utf8NoBom)
+Write-Host "[+] Wrote deployed game file -> $deployedGamePath"
 
 # Also copy to local workspace if we have real/workspace setup
 $localWorkspace = "$env:LOCALAPPDATA\Real\workspace\build"

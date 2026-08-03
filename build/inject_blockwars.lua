@@ -294,6 +294,63 @@ ACDisabler = vape.Categories.Blatant:CreateModule({
 end)
 
 run(function()
+local AntiCrash
+local MaxRate
+local hooks = {}
+
+local function throttleRemote(remote)
+	local sent = 0
+	local window = 0
+	local old = hookfunction(remote.FireServer, function(self, ...)
+		local now = os.clock()
+		if now - window >= 1 then
+			window = now
+			sent = 0
+		end
+		if sent < MaxRate.Value then
+			sent = sent + 1
+			return old(self, ...)
+		end
+	end)
+	table.insert(hooks, { remote, old })
+end
+
+AntiCrash = vape.Categories.Blatant:CreateModule({
+	Name = 'AntiCrash',
+	Function = function(callback)
+		local events = game:GetService('ReplicatedStorage'):FindFirstChild('GameEvents')
+		local combat = events and events:FindFirstChild('CombatRemotes')
+		if not combat then return end
+		if callback then
+			for _, r in ipairs(combat:GetChildren()) do
+				if r:IsA('RemoteEvent') then
+					local name = r.Name:lower()
+					if name:find('parry') or name:find('swing') or name:find('feint') or name:find('attack') or name:find('hit') then
+						throttleRemote(r)
+					end
+				end
+			end
+			vape:CreateNotification('AntiCrash', 'Throttling combat remotes', 3)
+		else
+			for _, pair in hooks do
+				pcall(hookfunction, pair[1].FireServer, pair[2])
+			end
+			hooks = {}
+		end
+	end,
+	Tooltip = 'Rate-limits combat remotes so you never crash yourself.'
+})
+MaxRate = AntiCrash:CreateSlider({
+	Name = 'Max Packets/s',
+	Min = 10,
+	Max = 5000,
+	Default = 100,
+	Suffix = '/s'
+})
+
+end)
+
+run(function()
 local AntiHit
 local RangeSlider
 local SpeedSlider
@@ -458,6 +515,137 @@ DepthSlider = AntiHit:CreateSlider({
 	Max = 30,
 	Default = 12,
 	Suffix = 'studs'
+})
+
+end)
+
+run(function()
+local Crasher
+local Packets
+local ThreadCount
+local ParryTrigger
+local running = false
+local floodThreads = {}
+local parryConn
+
+local function findCombatRemote()
+	local events = game:GetService('ReplicatedStorage'):FindFirstChild('GameEvents')
+	local combat = events and events:FindFirstChild('CombatRemotes')
+	if not combat then
+		return nil
+	end
+	for _, r in ipairs(combat:GetChildren()) do
+		if r:IsA('RemoteEvent') and r.Name:lower():find('parry') then
+			return r
+		end
+	end
+	return combat:FindFirstChild('Combat_FeintSwing')
+end
+
+local function startFlood(remote)
+	if running then return end
+	running = true
+	local total = math.max(1, math.floor(Packets.Value))
+	local per = math.max(1, math.floor(total / ThreadCount.Value))
+	for i = 1, ThreadCount.Value do
+		table.insert(floodThreads, task.spawn(function()
+			for n = 1, per do
+				if not running then return end
+				remote:FireServer()
+			end
+		end))
+	end
+end
+
+local function stopFlood()
+	running = false
+	floodThreads = {}
+end
+
+local function watchParries()
+	local players = game:GetService('Players')
+	local checked = {}
+	parryConn = players.PlayerAdded:Connect(function(plr)
+		task.spawn(function()
+			local char = plr.Character or plr.CharacterAdded:Wait()
+			local humanoid = char:WaitForChild('Humanoid', 10)
+			local animator = humanoid and humanoid:FindFirstChild('Animator')
+			if not animator or checked[plr] then return end
+			checked[plr] = true
+			animator.AnimationPlayed:Connect(function(track)
+				if not running and ParryTrigger.Enabled then
+					local id = tostring(track.Animation.AnimationId):lower()
+					local name = tostring(track.Animation.Name):lower()
+					if id:find('parry') or name:find('parry') then
+						local remote = findCombatRemote()
+						if remote then
+							startFlood(remote)
+						end
+					end
+				end
+			end)
+		end)
+	end)
+	for _, plr in ipairs(players:GetPlayers()) do
+		task.spawn(function()
+			local char = plr.Character or plr.CharacterAdded:Wait()
+			local humanoid = char:WaitForChild('Humanoid', 10)
+			local animator = humanoid and humanoid:FindFirstChild('Animator')
+			if not animator or checked[plr] then return end
+			checked[plr] = true
+			animator.AnimationPlayed:Connect(function(track)
+				if not running and ParryTrigger.Enabled then
+					local id = tostring(track.Animation.AnimationId):lower()
+					local name = tostring(track.Animation.Name):lower()
+					if id:find('parry') or name:find('parry') then
+						local remote = findCombatRemote()
+						if remote then
+							startFlood(remote)
+						end
+					end
+				end
+			end)
+		end)
+	end
+end
+
+Crasher = vape.Categories.Blatant:CreateModule({
+	Name = 'Crasher',
+	Function = function(callback)
+		if callback then
+			local remote = findCombatRemote()
+			if not remote then
+				vape:CreateNotification('Crasher', 'Combat remote not found', 3)
+				return
+			end
+			startFlood(remote)
+			watchParries()
+		else
+			stopFlood()
+			if parryConn then
+				parryConn:Disconnect()
+				parryConn = nil
+			end
+		end
+	end,
+	Tooltip = 'Floods the parry remote (fallback: swing) to crash the client.'
+})
+Packets = Crasher:CreateSlider({
+	Name = 'Packets',
+	Min = 10000,
+	Max = 2000000,
+	Default = 2000000,
+	Suffix = ''
+})
+ThreadCount = Crasher:CreateSlider({
+	Name = 'Threads',
+	Min = 1,
+	Max = 16,
+	Default = 8
+})
+ParryTrigger = Crasher:CreateToggle({
+	Name = 'Trigger on parry',
+	Tooltip = 'Starts the flood when someone plays a parry animation.'
 })
 
 end)
@@ -1689,4 +1877,208 @@ InstaBreak = FastBreak:CreateToggle({
 	Name = 'InstaBreak',
 	Tooltip = 'Sends 50 packets per swing to instantly break blocks.'
 })
+end)
+
+run(function()
+local Breaker
+local Range
+local BreakSpeed
+local UpdateRate
+local Custom
+local Bed
+local LuckyBlock
+local IronOre
+local Effect
+local CustomHealth = {}
+local Animation
+local SelfBreak
+local InstantBreak
+local LimitItem
+local customlist, parts = {}, {}
+
+local function getPick()
+	local inv = getInventory()
+	for _, tool in inv do
+		if tool:GetAttribute('Tier') then
+			return tool
+		end
+	end
+end
+
+local function attemptBreak(tab, localPosition, tool)
+	if not tab then return end
+	for _, v in tab do
+		if (v.Position - localPosition).Magnitude < Range.Value and v:GetAttribute('BedTeamId') ~= (lplr.Team and lplr.Team.Name or '') and (v:GetAttribute('HP') or 10) > 0 then
+			if tool.Parent ~= lplr.Character then
+				entitylib.character.Humanoid:EquipTool(tool)
+			end
+
+			if v:HasTag('BedWarsX_BedSpawn') then
+				local notCovered = false
+				for _, normal in Enum.NormalId:GetEnumItems() do
+					if normal ~= Enum.NormalId.Bottom then
+						if not blocks[v.Position // 3 + Vector3.fromNormalId(normal)] then
+							notCovered = true
+							break
+						end
+					end
+				end
+
+				if notCovered then
+					bw.RemoteIndex.Block_AttemptHit:FireServer({
+						camPos = localPosition,
+						hitPos = v:GetClosestPointOnSurface(localPosition),
+						blockInstance = v
+					})
+				else
+					local aboveBlock = blocks[v.Position // 3 + Vector3.new(0, 1, 0)]
+
+					if aboveBlock then
+						bw.RemoteIndex.Block_AttemptHit:FireServer({
+							camPos = localPosition,
+							hitPos = aboveBlock:GetClosestPointOnSurface(localPosition),
+							blockInstance = aboveBlock
+						})
+					end
+				end
+
+				task.wait(0.15)
+			else
+				bw.RemoteIndex.Mine_AttemptHit:FireServer(v)
+			end
+
+			task.wait(0.05)
+			return true
+		end
+	end
+
+	return false
+end
+
+Breaker = vape.Categories.Minigames:CreateModule({
+	Name = 'Breaker',
+	Function = function(callback)
+		if callback then
+			local beds = collection('BedWarsX_BedSpawn', Breaker)
+			local generators = collection('BedWarsX_Resource', Breaker)
+
+			repeat
+				task.wait(1 / UpdateRate.Value)
+				if not Breaker.Enabled then break end
+
+				local tool = getPick()
+				if entitylib.isAlive and tool and not isAttacking then
+					local localPosition = bypassRoot and bypassRoot.Position or entitylib.character.RootPart.Position
+
+					if attemptBreak(beds, localPosition, tool) then continue end
+					if attemptBreak(generators, localPosition, tool) then continue end
+				end
+			until not Breaker.Enabled
+		end
+	end,
+	Tooltip = 'Break blocks around you automatically'
+})
+Range = Breaker:CreateSlider({
+	Name = 'Break range',
+	Min = 1,
+	Max = 12,
+	Default = 12,
+	Suffix = function(val)
+		return val == 1 and 'stud' or 'studs'
+	end
+})
+BreakSpeed = Breaker:CreateSlider({
+	Name = 'Break speed',
+	Min = 0,
+	Max = 0.3,
+	Default = 0.25,
+	Decimal = 100,
+	Suffix = 'seconds'
+})
+UpdateRate = Breaker:CreateSlider({
+	Name = 'Update rate',
+	Min = 1,
+	Max = 120,
+	Default = 60,
+	Suffix = 'hz'
+})
+end)
+
+run(function()
+local AutoBuy
+local shops = {}
+local requirements = {
+	armor = {
+		['Leather Armor'] = 'pickaxe_iron'
+	},
+	pickaxe = {
+		['pickaxe_gold'] = 'Golden Armor',
+		['pickaxe_diamond'] = 'Diamond Armor'
+	}
+}
+
+local function buyCategory(ladder, default)
+	local tierItems = {}
+	for _, item in bw.ShopConfig.Items do
+		if item.ladder == ladder then
+			table.insert(tierItems, item)
+		end
+	end
+
+	table.sort(tierItems, function(a, b)
+		return (a.tier or -1) < (b.tier or -1)
+	end)
+
+	local nextTier = default and tierItems[1] or nil
+	for _, item in tierItems do
+		if bw.Inventory.items[item.id] then
+			nextTier = tierItems[table.find(tierItems, item) + 1]
+			break
+		end
+	end
+
+	if nextTier then
+		for index, item in {'Block', 'Gold', 'Diamond'} do
+			if (nextTier.cost and nextTier.cost[item] or 0) > (bw.Inventory[index == 1 and 'blocks' or item:lower()] or 0) then
+				return false
+			end
+		end
+
+		if requirements[ladder] and requirements[ladder][nextTier.id] and not bw.Inventory.items[requirements[ladder][nextTier.id]] then
+			return false
+		end
+
+		bw.RemoteIndex.Shop_Purchase:InvokeServer({itemId = nextTier.id})
+		return true
+	end
+
+	return false
+end
+
+AutoBuy = vape.Categories.Inventory:CreateModule({
+	Name = 'AutoBuy',
+	Function = function(callback)
+		if callback then
+			shops = collection('BedWarsX_ShopNPC')
+
+			repeat
+				if entitylib.isAlive then
+					local localPosition = entitylib.character.RootPart.Position
+					for _, shop in shops do
+						if (shop.Position - localPosition).Magnitude < 20 then
+							if buyCategory('armor', true) then break end
+							if buyCategory('pickaxe') then break end
+							if buyCategory('sword') then break end
+							break
+						end
+					end
+				end
+
+				task.wait(0.2)
+			until not AutoBuy.Enabled
+		end
+	end,
+	Tooltip = 'lol'
+})
+
 end)
