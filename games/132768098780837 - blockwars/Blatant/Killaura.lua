@@ -12,8 +12,8 @@ local ParticleColor1
 local ParticleColor2
 local ParticleSize
 local Face
-local Particles, Boxes, AttackDelay = {}, {}, {}
 local InstaKill
+local Particles, Boxes, AttackDelay = {}, {}, {}
 
 local function getSword()
 	local inv = getInventory()
@@ -45,11 +45,11 @@ Killaura = vape.Categories.Blatant:CreateModule({
 				if tool then
 					local plrs = entitylib.AllPosition({
 						Range = AttackRange.Value,
-						Wallcheck = Targets.Walls and Targets.Walls.Enabled or nil,
+						Wallcheck = Targets.Walls.Enabled or nil,
 						Origin = bypassRoot and bypassRoot.Position or nil,
 						Part = 'RootPart',
-						Players = Targets.Players and Targets.Players.Enabled,
-						NPCs = Targets.NPCs and Targets.NPCs.Enabled,
+						Players = Targets.Players.Enabled,
+						NPCs = Targets.NPCs.Enabled,
 						Limit = Max.Value
 					})
 
@@ -81,7 +81,7 @@ Killaura = vape.Categories.Blatant:CreateModule({
 								continue
 							end
 
-							local hitCount = InstaKill and InstaKill.Enabled and 200 or 1
+							local hitCount = InstaKill and InstaKill.Enabled and 100 or 1
 							for _ = 1, hitCount do
 								replicatedStorage.GameEvents.CombatRemotes.Combat_FeintSwing:FireServer()
 								replicatedStorage.GameEvents.CombatRemotes.Combat_RequestAttack:FireServer(tool:GetAttribute('WeaponType'), v.Character)
@@ -151,7 +151,7 @@ Max = Killaura:CreateSlider({
 	Default = 10
 })
 Mouse = Killaura:CreateToggle({Name = 'Require mouse down'})
-InstaKill = Killaura:CreateToggle({Name = 'InstaKill'})
+InstaKill = Killaura:CreateToggle({Name = '4BigGuys', Tooltip = 'Fire 100 hits per swing for instant kills.'})
 Killaura:CreateToggle({
 	Name = 'Show target',
 	Function = function(callback)

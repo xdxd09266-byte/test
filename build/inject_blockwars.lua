@@ -26,7 +26,7 @@ local sessioninfo = vape.Libraries.sessioninfo
 local bw = {}
 local blocks = {}
 local BlockTimes = {}
-local AnticheatBypass
+local ACDisabler
 local bypassRoot
 local isAttacking
 
@@ -212,8 +212,8 @@ local function clampVec(vec, max)
 	return vec
 end
 
-AnticheatBypass = vape.Categories.Blatant:CreateModule({
-	Name = 'AnticheatBypass',
+ACDisabler = vape.Categories.Blatant:CreateModule({
+	Name = 'AC Disabler',
 	Function = function(callback)
 		if callback then
 			bypassRoot = Instance.new('Part')
@@ -223,7 +223,7 @@ AnticheatBypass = vape.Categories.Blatant:CreateModule({
 			bypassRoot.Material = Enum.Material.SmoothPlastic
 			bypassRoot.Transparency = 1
 			bypassRoot.Parent = workspace.CurrentCamera
-			AnticheatBypass:Clean(bypassRoot)
+			ACDisabler:Clean(bypassRoot)
 
 			local oldcf, oldvelo
 			local bindKey = game:GetService('HttpService'):GenerateGUID(true)
@@ -233,19 +233,19 @@ AnticheatBypass = vape.Categories.Blatant:CreateModule({
 				end
 			end)
 
-			AnticheatBypass:Clean(function()
+			ACDisabler:Clean(function()
 				runService:UnbindFromRenderStep(bindKey)
 			end)
 
 			for _, connection in {entitylib.Events.LocalAdded, replicatedStorage.GameEvents.BedWarsRemotes.AntiCheat_Strike.OnClientEvent} do
-				AnticheatBypass:Clean(connection:Connect(function()
+				ACDisabler:Clean(connection:Connect(function()
 					oldcf = nil
 				end))
 			end
 
 			local tpTimer = 0
 			local fallTimer = 0
-			AnticheatBypass:Clean(runService.Heartbeat:Connect(function(dt)
+			ACDisabler:Clean(runService.Heartbeat:Connect(function(dt)
 				if entitylib.isAlive then
 					local root = entitylib.character.RootPart
 					if not oldcf then
@@ -288,85 +288,313 @@ AnticheatBypass = vape.Categories.Blatant:CreateModule({
 			bypassRoot = nil
 		end
 	end,
-	Tooltip = 'Using various methods to bypass the Anticheat.'
+	Tooltip = 'a disabler xd disables most checks'
 })
+
+end)
+
+run(function()
+local AntiHit
+local RangeSlider
+local SpeedSlider
+local BounceSlider
+local DepthSlider
+
+local function getIgnore()
+	local ignore = {gameCamera, entitylib.character.Character}
+	for _, ent in entitylib.List do
+		if ent.Character then
+			table.insert(ignore, ent.Character)
+		end
+	end
+	return ignore
+end
+
+local function getDiveY(root, params)
+	-- top surface of the map
+	local top = workspace:Raycast(root.Position + Vector3.new(0, 50, 0), Vector3.new(0, -400, 0), params)
+	local topY = top and top.Position.Y or root.Position.Y
+
+	-- walk down looking for a pocket that fully fits the character
+	local probe = topY - 3
+	while probe > topY - 60 do
+		local up = workspace:Raycast(Vector3.new(root.Position.X, probe + 2, root.Position.Z), Vector3.new(0, 8, 0), params)
+		local down = workspace:Raycast(Vector3.new(root.Position.X, probe - 2, root.Position.Z), Vector3.new(0, -8, 0), params)
+
+		local ceilingY = up and up.Position.Y or probe + 10
+		local floorY = down and down.Position.Y or probe - 10
+
+		if ceilingY > probe + 3.5 and floorY < probe - 2.5 then
+			return probe, ceilingY, floorY
+		end
+		probe -= 2
+	end
+
+	return topY - DepthSlider.Value, math.huge, -math.huge
+end
+
+local function hasMelee(char)
+	for _, child in char:GetChildren() do
+		if child:IsA('Tool') and child:GetAttribute('WeaponType') then
+			return true
+		end
+	end
+	return false
+end
+
+local function threatNear(me)
+	for _, ent in entitylib.List do
+		if not ent.Targetable or not ent.RootPart or not ent.Character then
+			continue
+		end
+		if (ent.RootPart.Position - me).Magnitude > RangeSlider.Value then
+			continue
+		end
+		if hasMelee(ent.Character) then
+			return true
+		end
+	end
+	return false
+end
+
+AntiHit = vape.Categories.Blatant:CreateModule({
+	Name = 'Anti Hit',
+	Function = function(callback)
+		if callback then
+			local under = false
+			local original, anchor, ceiling, floor, goingUp
+			local lastBounce = 0
+
+			AntiHit:Clean(function()
+				if under then
+					pcall(function()
+						local root = entitylib.isAlive and entitylib.character.RootPart
+						if root then
+							root.CFrame = original
+							root.AssemblyLinearVelocity = Vector3.zero
+						end
+					end)
+				end
+				under = false
+			end)
+
+			AntiHit:Clean(runService.Heartbeat:Connect(function()
+				if not entitylib.isAlive then
+					under = false
+					return
+				end
+
+				local root = entitylib.character.RootPart
+				local threatened = threatNear(root.Position)
+
+				if threatened and not under then
+					local params = RaycastParams.new()
+					params.FilterType = Enum.RaycastFilterType.Exclude
+					params.FilterDescendantsInstances = getIgnore()
+					local diveY, cY, fY = getDiveY(root, params)
+					original = root.CFrame
+					anchor, ceiling, floor = diveY, cY, fY
+					goingUp, lastBounce = true, 0
+					root.CFrame = CFrame.new(original.Position.X, anchor, original.Position.Z) * original.Rotation
+					root.AssemblyLinearVelocity = Vector3.zero
+					under = true
+				end
+
+				if under then
+					if MethodSlider.Value == 'Up/Down' then
+						local interval = 1 / math.max(SpeedSlider.Value, 0.1)
+						if os.clock() - lastBounce >= interval then
+							lastBounce = os.clock()
+							local bounce = math.min(BounceSlider.Value, ceiling - anchor - 3.5, anchor - floor - 2.5)
+							bounce = math.max(bounce, 0.5)
+							local ny = goingUp and (anchor + bounce) or (anchor - bounce)
+							root.CFrame = CFrame.new(original.Position.X, ny, original.Position.Z) * original.Rotation
+							root.AssemblyLinearVelocity = Vector3.zero
+							goingUp = not goingUp
+						end
+					end
+
+					if not threatened then
+						root.CFrame = original
+						root.AssemblyLinearVelocity = Vector3.zero
+						under = false
+					end
+				end
+			end))
+		end
+	end,
+	Tooltip = 'When enemies with melee weapons are near, sinks into an air pocket under the map and either stays under or teleports up and down (see Method) so server-side hitchecks miss. Disabling snaps you back up.'
+})
+
+MethodSlider = AntiHit:CreateDropdown({
+	Name = 'Method',
+	List = {'Up/Down', 'Under Map'},
+	Default = 'Up/Down'
+})
+RangeSlider = AntiHit:CreateSlider({
+	Name = 'Range',
+	Min = 6,
+	Max = 24,
+	Default = 13,
+	Suffix = 'studs'
+})
+SpeedSlider = AntiHit:CreateSlider({
+	Name = 'Speed',
+	Min = 1,
+	Max = 10,
+	Default = 5,
+	Suffix = 'tps/s'
+})
+BounceSlider = AntiHit:CreateSlider({
+	Name = 'Bounce',
+	Min = 1,
+	Max = 8,
+	Default = 4,
+	Suffix = 'studs'
+})
+DepthSlider = AntiHit:CreateSlider({
+	Name = 'Depth',
+	Min = 5,
+	Max = 30,
+	Default = 12,
+	Suffix = 'studs'
+})
+
 end)
 
 run(function()
 local Fly
-run(function()
-	local Value
-	local Keys
-	local Platform = Instance.new('Part')
-	Platform.CanQuery = false
-	Platform.Anchored = true
-	Platform.Size = Vector3.new(4, 1, 4)
-	Platform.Transparency = 1
-	Platform.Parent = nil
+local Value
+local Keys
+local Platform = Instance.new('Part')
+Platform.CanQuery = false
+Platform.Anchored = true
+Platform.Size = Vector3.new(4, 1, 4)
+Platform.Transparency = 1
+Platform.Parent = nil
 
-	Fly = vape.Categories.Blatant:CreateModule({
-		Name = 'Fly',
-		Function = function(callback)
-			if Platform then
-				Platform.Parent = callback and gameCamera or nil
+Fly = vape.Categories.Blatant:CreateModule({
+	Name = 'Fly',
+	Function = function(callback)
+		if Platform then
+			Platform.Parent = callback and gameCamera or nil
+		end
+
+		if callback then
+			if not ACDisabler.Enabled then
+				ACDisabler:Toggle()
 			end
 
-			if callback then
-				if not AnticheatBypass.Enabled then
-					AnticheatBypass:Toggle()
+			Fly:Clean(runService.PreSimulation:Connect(function(dt)
+				if entitylib.isAlive then
+					applySpeed(Value.Value, dt)
+					Platform.CFrame = down ~= 0 and CFrame.identity or entitylib.character.RootPart.CFrame + Vector3.new(0, -(entitylib.character.HipHeight + 0.5), 0)
 				end
+			end))
 
-				Fly:Clean(runService.PreSimulation:Connect(function(dt)
-					if entitylib.isAlive then
-						applySpeed(Value.Value, dt)
-						Platform.CFrame = down ~= 0 and CFrame.identity or entitylib.character.RootPart.CFrame + Vector3.new(0, -(entitylib.character.HipHeight + 0.5), 0)
+			up, down = 0, 0
+			for _, v in {'InputBegan', 'InputEnded'} do
+				Fly:Clean(inputService[v]:Connect(function(input)
+					if not inputService:GetFocusedTextBox() then
+						local divided = Keys.Value:split('/')
+						if input.KeyCode == Enum.KeyCode[divided[1]] then
+							up = v == 'InputBegan' and 1 or 0
+						elseif input.KeyCode == Enum.KeyCode[divided[2]] then
+							down = v == 'InputBegan' and -1 or 0
+						end
 					end
 				end))
-
-				up, down = 0, 0
-				for _, v in {'InputBegan', 'InputEnded'} do
-					Fly:Clean(inputService[v]:Connect(function(input)
-						if not inputService:GetFocusedTextBox() then
-							local divided = Keys.Value:split('/')
-							if input.KeyCode == Enum.KeyCode[divided[1]] then
-								up = v == 'InputBegan' and 1 or 0
-							elseif input.KeyCode == Enum.KeyCode[divided[2]] then
-								down = v == 'InputBegan' and -1 or 0
-							end
-						end
-					end))
-				end
-
-				if inputService.TouchEnabled then
-					pcall(function()
-						local jumpButton = lplr.PlayerGui.TouchGui.TouchControlFrame.JumpButton
-						Fly:Clean(jumpButton:GetPropertyChangedSignal('ImageRectOffset'):Connect(function()
-							up = jumpButton.ImageRectOffset.X == 146 and 1 or 0
-						end))
-					end)
-				end
 			end
-		end,
-		ExtraText = function()
-			return 'BlockWars'
-		end,
-		Tooltip = 'Makes you go zoom.'
-	})
-	Keys = Fly:CreateDropdown({
-		Name = 'Keys',
-		List = {'Space/LeftControl', 'Space/LeftShift', 'E/Q', 'Space/Q', 'ButtonA/ButtonL2'},
-		Tooltip = 'The key combination for going up & down'
-	})
-	Value = Fly:CreateSlider({
-		Name = 'Speed',
-		Min = 1,
-		Max = 38,
-		Default = 38,
-		Suffix = function(val)
-			return val == 1 and 'stud' or 'studs'
+
+			if inputService.TouchEnabled then
+				pcall(function()
+					local jumpButton = lplr.PlayerGui.TouchGui.TouchControlFrame.JumpButton
+					Fly:Clean(jumpButton:GetPropertyChangedSignal('ImageRectOffset'):Connect(function()
+						up = jumpButton.ImageRectOffset.X == 146 and 1 or 0
+					end))
+				end)
+			end
 		end
-	})
+	end,
+	ExtraText = function()
+		return 'BlockWars'
+	end,
+	Tooltip = 'Makes you go zoom.'
+})
+Keys = Fly:CreateDropdown({
+	Name = 'Keys',
+	List = {'Space/LeftControl', 'Space/LeftShift', 'E/Q', 'Space/Q', 'ButtonA/ButtonL2'},
+	Tooltip = 'The key combination for going up & down'
+})
+Value = Fly:CreateSlider({
+	Name = 'Speed',
+	Min = 1,
+	Max = 38,
+	Default = 38,
+	Suffix = function(val)
+		return val == 1 and 'stud' or 'studs'
+	end
+})
+
 end)
+
+run(function()
+local InfiniteJump
+local VelocitySlider
+local up = false
+
+InfiniteJump = vape.Categories.Blatant:CreateModule({
+	Name = 'InfiniteJump',
+	Function = function(callback)
+		if callback then
+			if not ACDisabler.Enabled then
+				ACDisabler:Toggle()
+			end
+
+			InfiniteJump:Clean(runService.PreSimulation:Connect(function()
+				if entitylib.isAlive and up then
+					local root = entitylib.character.RootPart
+					root.AssemblyLinearVelocity = Vector3.new(root.AssemblyLinearVelocity.X, VelocitySlider.Value, root.AssemblyLinearVelocity.Z)
+				end
+			end))
+
+			InfiniteJump:Clean(inputService.InputBegan:Connect(function(input)
+				if not inputService:GetFocusedTextBox() then
+					if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA then
+						up = true
+					end
+				end
+			end))
+
+			InfiniteJump:Clean(inputService.InputEnded:Connect(function(input)
+				if input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.ButtonA then
+					up = false
+				end
+			end))
+
+			if inputService.TouchEnabled then
+				pcall(function()
+					local jumpButton = lplr.PlayerGui.TouchGui.TouchControlFrame.JumpButton
+					InfiniteJump:Clean(jumpButton:GetPropertyChangedSignal('ImageRectOffset'):Connect(function()
+						up = jumpButton.ImageRectOffset.X == 146
+					end))
+				end)
+			end
+		else
+			up = false
+		end
+	end,
+	Tooltip = 'Jump infinitely with vertical velocity while holding Space. Automatically enables the anticheat bypass.'
+})
+
+VelocitySlider = InfiniteJump:CreateSlider({
+	Name = 'Velocity',
+	Min = 10,
+	Max = 150,
+	Default = 50,
+	Suffix = ' velocity'
+})
+
 end)
 
 run(function()
@@ -384,8 +612,8 @@ local ParticleColor1
 local ParticleColor2
 local ParticleSize
 local Face
-local Particles, Boxes, AttackDelay = {}, {}, {}
 local InstaKill
+local Particles, Boxes, AttackDelay = {}, {}, {}
 
 local function getSword()
 	local inv = getInventory()
@@ -453,7 +681,7 @@ Killaura = vape.Categories.Blatant:CreateModule({
 								continue
 							end
 
-							local hitCount = InstaKill and InstaKill.Enabled and 200 or 1
+							local hitCount = InstaKill and InstaKill.Enabled and 100 or 1
 							for _ = 1, hitCount do
 								replicatedStorage.GameEvents.CombatRemotes.Combat_FeintSwing:FireServer()
 								replicatedStorage.GameEvents.CombatRemotes.Combat_RequestAttack:FireServer(tool:GetAttribute('WeaponType'), v.Character)
@@ -523,7 +751,7 @@ Max = Killaura:CreateSlider({
 	Default = 10
 })
 Mouse = Killaura:CreateToggle({Name = 'Require mouse down'})
-InstaKill = Killaura:CreateToggle({Name = 'InstaKill'})
+InstaKill = Killaura:CreateToggle({Name = '4BigGuys', Tooltip = 'Fire 100 hits per swing for instant kills.'})
 Killaura:CreateToggle({
 	Name = 'Show target',
 	Function = function(callback)
@@ -655,6 +883,7 @@ ParticleSize = Killaura:CreateSlider({
 	Visible = false
 })
 Face = Killaura:CreateToggle({Name = 'Face target'})
+
 end)
 
 run(function()
@@ -668,8 +897,8 @@ Speed = vape.Categories.Blatant:CreateModule({
 	Name = 'Speed',
 	Function = function(callback)
 		if callback then
-			if not AnticheatBypass.Enabled then
-				AnticheatBypass:Toggle()
+			if not ACDisabler.Enabled then
+				ACDisabler:Toggle()
 			end
 
 			Speed:Clean(runService.PreSimulation:Connect(function(dt)
@@ -727,6 +956,7 @@ AutoJumpValue = Speed:CreateSlider({
 	Darker = true,
 	Visible = false
 })
+
 end)
 
 run(function()
@@ -833,6 +1063,82 @@ AutoLeave = vape.Categories.Utility:CreateModule({
 	end,
 	Tooltip = 'Automatically leave after the match ends.'
 })
+end)
+
+run(function()
+local AutoPotions
+local toggles = {}
+local nextDrink = {}
+local AutoBuyToggle
+local potions = {
+	potion_invis = {tool = 'InvisiblePotion', fallback = 15},
+	potion_speed = {tool = 'SpeedPotion', fallback = 15},
+	potion_jump = {tool = 'JumpPotion', fallback = 15}
+}
+
+for id, info in potions do
+	local item = bw.ShopConfig.Items[id]
+	info.duration = (item and item.stats and item.stats.duration) or info.fallback
+end
+
+local function findTool(id)
+	local name = potions[id].tool
+	for _, tool in getInventory() do
+		if tool.Name == name or tool:GetAttribute('_BaseName') == name then
+			return tool
+		end
+	end
+	return nil
+end
+
+local function drink(id)
+	local tool = findTool(id)
+	if not tool then
+		local item = bw.ShopConfig.Items[id]
+		local cost = item and item.cost and item.cost.Block or 0
+		if AutoBuyToggle.Enabled and cost > 0 and (bw.Inventory.blocks or 0) >= cost then
+			bw.RemoteIndex.Shop_Purchase:InvokeServer({itemId = id})
+			tool = findTool(id)
+		end
+		if not tool then
+			return
+		end
+	end
+
+	if tool.Parent ~= entitylib.character then
+		entitylib.character.Humanoid:EquipTool(tool)
+	end
+	tool:Activate()
+	nextDrink[id] = workspace:GetServerTimeNow() + potions[id].duration + 1
+end
+
+AutoPotions = vape.Categories.Utility:CreateModule({
+	Name = 'AutoPotions',
+	Function = function(callback)
+		if callback then
+			task.spawn(function()
+				repeat
+					if entitylib.isAlive then
+						local now = workspace:GetServerTimeNow()
+						for id, toggle in toggles do
+							if toggle.Enabled and (nextDrink[id] or 0) < now then
+								drink(id)
+							end
+						end
+					end
+					task.wait(0.5)
+				until not AutoPotions.Enabled
+				table.clear(nextDrink)
+			end)
+		end
+	end,
+	Tooltip = 'Buys and drinks potions as soon as their effect wears off: permanent invisibility, speed and jump.'
+})
+toggles.potion_invis = AutoPotions:CreateToggle({Name = 'Invis', Default = true})
+toggles.potion_speed = AutoPotions:CreateToggle({Name = 'Speed'})
+toggles.potion_jump = AutoPotions:CreateToggle({Name = 'Jump'})
+AutoBuyToggle = AutoPotions:CreateToggle({Name = 'Auto buy', Default = true})
+
 end)
 
 run(function()
@@ -946,6 +1252,371 @@ pcall(function()
 		end
 	end
 end)
+end)
+
+run(function()
+local Detector
+local SpeedSlider
+local flagged = {}
+local highlights = {}
+
+local function flagPlayer(plr)
+	if flagged[plr] then return end
+	flagged[plr] = true
+	vape:CreateNotification('Cheat Detector', plr.Name..' is cheating (speed)', 5, 'alert')
+end
+
+local function clearPlayer(plr)
+	flagged[plr] = nil
+	local hl = highlights[plr]
+	if hl then
+		hl:Destroy()
+		highlights[plr] = nil
+	end
+end
+
+local function clearAll()
+	local keys = {}
+	for plr in highlights do
+		table.insert(keys, plr)
+	end
+	for _, plr in keys do
+		clearPlayer(plr)
+	end
+	table.clear(flagged)
+end
+
+local function refreshHighlight(plr, hue)
+	local char = plr.Character
+	if not char then
+		clearPlayer(plr)
+		return
+	end
+	local hl = highlights[plr]
+	if not hl or hl.Parent ~= char then
+		if hl then
+			hl:Destroy()
+		end
+		hl = Instance.new('Highlight')
+		hl.FillTransparency = 0.35
+		hl.OutlineTransparency = 0
+		hl.Parent = char
+		highlights[plr] = hl
+	end
+	hl.FillColor = Color3.fromHSV(hue % 1, 1, 1)
+end
+
+Detector = vape.Categories.Utility:CreateModule({
+	Name = 'Cheat Detector',
+	Function = function(callback)
+		if callback then
+			local samples = {}
+
+			Detector:Clean(runService.Heartbeat:Connect(function()
+				local hue = tick() % 1
+				for plr in flagged do
+					refreshHighlight(plr, hue + plr.UserId % 10 / 10)
+				end
+			end))
+
+			Detector:Clean(playersService.PlayerRemoving:Connect(clearPlayer))
+
+			Detector:Clean(bw.RemoteIndex.Victory_Show.OnClientEvent:Connect(clearAll))
+
+			task.spawn(function()
+				repeat
+					task.wait(0.4)
+					if not Detector.Enabled then break end
+					local now = tick()
+					for _, ent in entitylib.List do
+						local plr = ent.Player
+						if not plr or plr == lplr or not ent.RootPart or flagged[plr] then
+							continue
+						end
+						local pos = ent.RootPart.Position * Vector3.new(1, 0, 1)
+						local sample = samples[plr]
+						if sample then
+							local speed = (pos - sample.pos).Magnitude / (now - sample.time)
+							if speed > SpeedSlider.Value then
+								local streak = sample.streak + 1
+								if streak >= 3 then
+									flagPlayer(plr)
+								else
+									samples[plr] = {pos = pos, time = now, streak = streak}
+								end
+							else
+								samples[plr] = {pos = pos, time = now, streak = 0}
+							end
+						else
+							samples[plr] = {pos = pos, time = now, streak = 0}
+						end
+					end
+				until not Detector.Enabled
+				table.clear(samples)
+			end)
+		else
+			clearAll()
+		end
+	end,
+	Tooltip = 'Detects players moving faster than physically possible (sustained speed above the threshold) and highlights them in rainbow for the rest of the match.'
+})
+SpeedSlider = Detector:CreateSlider({
+	Name = 'Speed threshold',
+	Min = 25,
+	Max = 100,
+	Default = 40,
+	Suffix = ' studs/s'
+})
+
+end)
+
+run(function()
+local StreamSniper
+local WhitelistList
+local NotifyJoin
+local AutoQueueToggle
+local track
+local tracked = {}
+local notified = {}
+local resolvedIds = {}
+local resolvedEntries = {}
+local resolvedNames = {}
+local failedAt = {}
+local httpService = cloneref(game:GetService('HttpService'))
+local headers = {
+	['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+}
+
+local function persistCache()
+	pcall(function()
+		writefile('weedhack/streamsniper_cache.txt', httpService:JSONEncode(resolvedEntries))
+	end)
+end
+
+local function loadCache()
+	pcall(function()
+		if isfile and isfile('weedhack/streamsniper_cache.txt') then
+			local data = httpService:JSONDecode(readfile('weedhack/streamsniper_cache.txt'))
+			if type(data) == 'table' then
+				for k, v in data do
+					resolvedEntries[k] = v
+					if type(v) == 'number' then
+						resolvedIds[v] = true
+					end
+				end
+			end
+		end
+	end)
+end
+
+local function fetchUser(id)
+	local ok, res = pcall(function()
+		return game:HttpGet('https://users.roblox.com/v1/users/'..id, true, headers)
+	end)
+	if ok and res then
+		local ok2, data = pcall(function()
+			return httpService:JSONDecode(res)
+		end)
+		if ok2 and type(data) == 'table' and data.id then
+			resolvedIds[data.id] = true
+			if data.name then
+				resolvedNames[data.id] = data.name
+			end
+			return data
+		end
+	end
+	return nil
+end
+
+local function isWhitelisted(plr)
+	local name = plr.Name:lower()
+	local display = plr.DisplayName:lower()
+	for _, v in WhitelistList.ListEnabled do
+		local entry = tostring(v)
+		local low = entry:lower()
+		if low == name or low == display then
+			return true
+		end
+		local id = tonumber(entry)
+		if id and id == plr.UserId then
+			return true
+		end
+	end
+	return resolvedIds[plr.UserId] == true
+end
+
+local function resolveEntries(notify)
+	local pending = {}
+	for _, v in WhitelistList.ListEnabled do
+		local entry = tostring(v)
+		if resolvedEntries[entry] ~= nil then continue end
+		local id = tonumber(entry)
+		if id then
+			resolvedEntries[entry] = id
+			if not fetchUser(id) then
+				resolvedIds[id] = true
+			end
+		else
+			if (failedAt[entry] or 0) + 60 < os.clock() then
+				table.insert(pending, entry)
+			end
+		end
+	end
+
+	if #pending == 0 then
+		if notify then
+			vape:CreateNotification('Stream Sniper', 'Whitelist active', 3)
+		end
+		return
+	end
+
+	task.spawn(function()
+		local resolved = 0
+		for _, entry in pending do
+			if resolvedEntries[entry] ~= nil then continue end
+			local ok, res = pcall(function()
+				return game:HttpGet('https://users.roblox.com/v1/users/search?keyword='..httpService:UrlEncode(entry)..'&limit=10', true, headers)
+			end)
+			local low = entry:lower()
+			if ok and res then
+				local ok2, data = pcall(function()
+					return httpService:JSONDecode(res)
+				end)
+				if ok2 and type(data) == 'table' and data.data then
+					for _, user in data.data do
+						local uname = (user.name or ''):lower()
+						local dname = (user.displayName or ''):lower()
+						if uname == low or dname == low then
+							resolvedEntries[entry] = user.id
+							resolvedIds[user.id] = true
+							resolvedNames[user.id] = user.name
+							resolved += 1
+							break
+						end
+					end
+				end
+			end
+			if resolvedEntries[entry] == nil then
+				failedAt[entry] = os.clock()
+			end
+			task.wait(1.5)
+		end
+		persistCache()
+		for _, plr in playersService:GetPlayers() do
+			if plr ~= lplr then
+				track(plr, true)
+			end
+		end
+		if notify and resolved > 0 then
+			vape:CreateNotification('Stream Sniper', 'Whitelist resolved '..resolved..' users', 4)
+		end
+	end)
+end
+
+local function canQueue()
+	if lplr:GetAttribute('Searching') then
+		return false
+	end
+	if workspace:GetAttribute('ServerType') == 'Lobby' then
+		return true
+	end
+	local ok, state = pcall(function()
+		return bw.RemoteIndex.Matchmaking_Request:InvokeServer('status')
+	end)
+	if not ok or type(state) ~= 'table' then
+		return false
+	end
+	local st = state.state
+	if st == 'searching' or st == 'matched' or st == 'partyAlive' or st == 'partyMember' then
+		return false
+	end
+	return true
+end
+
+local function queueFor(plr)
+	if not canQueue() then return end
+	local ok, state = pcall(function()
+		return bw.RemoteIndex.Matchmaking_Request:InvokeServer('queue')
+	end)
+	if not ok then return end
+	if type(state) == 'table' and state.state == 'searching' then
+		vape:CreateNotification('Stream Sniper', 'Auto-queued to match '..plr.Name, 5)
+	end
+end
+
+track = function(plr, force)
+	if plr == lplr then return end
+	if not isWhitelisted(plr) then
+		if not tracked[plr] then
+			resolveEntries(false)
+		end
+		return
+	end
+	if tracked[plr] and not force then return end
+	if not notified[plr] then
+		notified[plr] = true
+		if NotifyJoin.Enabled then
+			vape:CreateNotification('Stream Sniper', plr.Name..' joined the server', 5)
+		end
+	end
+	if not tracked[plr] then
+		tracked[plr] = plr:GetAttributeChangedSignal('Searching'):Connect(function()
+			if plr:GetAttribute('Searching') then
+				if NotifyJoin.Enabled then
+					vape:CreateNotification('Stream Sniper', plr.Name..' is searching', 5)
+				end
+				if AutoQueueToggle.Enabled and isWhitelisted(plr) then
+					queueFor(plr)
+				end
+			end
+		end)
+		StreamSniper:Clean(tracked[plr])
+	end
+	if AutoQueueToggle.Enabled and plr:GetAttribute('Searching') then
+		queueFor(plr)
+	end
+end
+
+StreamSniper = vape.Categories.Utility:CreateModule({
+	Name = 'Stream Sniper',
+	Function = function(callback)
+		if callback then
+			loadCache()
+			resolveEntries(true)
+			StreamSniper:Clean(playersService.PlayerAdded:Connect(track))
+			StreamSniper:Clean(playersService.PlayerRemoving:Connect(function(plr)
+				if tracked[plr] then
+					tracked[plr]:Disconnect()
+					tracked[plr] = nil
+				end
+			end))
+			for _, plr in playersService:GetPlayers() do
+				if plr ~= lplr then
+					track(plr)
+				end
+			end
+		else
+			table.clear(tracked)
+			table.clear(notified)
+		end
+	end,
+	Tooltip = 'Fetches whitelisted users from the Roblox Users API (usernames, display names or user IDs all work). Notifies when they join or start searching, and auto-queues when they queue if you are in the lobby or at the end screen.'
+})
+NotifyJoin = StreamSniper:CreateToggle({Name = 'Notify join', Default = true})
+AutoQueueToggle = StreamSniper:CreateToggle({Name = 'Auto queue', Default = true})
+WhitelistList = StreamSniper:CreateTextList({
+	Name = 'Whitelist',
+	Default = {},
+	Tooltip = 'Add usernames, display names or user IDs',
+	Function = function()
+		if not WhitelistList then return end
+		table.clear(resolvedEntries)
+		table.clear(resolvedIds)
+		table.clear(resolvedNames)
+		resolveEntries(false)
+	end
+})
+
 end)
 
 run(function()

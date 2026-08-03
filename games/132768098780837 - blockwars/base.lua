@@ -26,7 +26,7 @@ local sessioninfo = vape.Libraries.sessioninfo
 local bw = {}
 local blocks = {}
 local BlockTimes = {}
-local AnticheatBypass
+local ACDisabler
 local bypassRoot
 local isAttacking
 

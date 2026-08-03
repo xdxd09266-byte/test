@@ -8,8 +8,8 @@ Speed = vape.Categories.Blatant:CreateModule({
 	Name = 'Speed',
 	Function = function(callback)
 		if callback then
-			if not AnticheatBypass.Enabled then
-				AnticheatBypass:Toggle()
+			if not ACDisabler.Enabled then
+				ACDisabler:Toggle()
 			end
 
 			Speed:Clean(runService.PreSimulation:Connect(function(dt)
