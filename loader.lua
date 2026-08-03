@@ -183,13 +183,7 @@ if not shared.VapeIndependent then
         if lplr then
             shared.vape:Clean(lplr.OnTeleport:Connect(function()
                 if not shared.VapeIndependent then
-                    local teleportScript = [[
-                        shared.vapereload = true
-                        shared.VapeDeveloper = true
-                        if isfile("loader.lua") then
-                            loadstring(readfile("loader.lua"))()
-                        end
-                    ]]
+                    local teleportScript = 'shared.vapereload = true; shared.VapeDeveloper = true; if isfile("loader.lua") then loadstring(readfile("loader.lua"))() end'
                     if queue_on_teleport then pcall(function() queue_on_teleport(teleportScript) end) end
                 end
             end))
