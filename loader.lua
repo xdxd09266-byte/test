@@ -59,14 +59,24 @@ end
 
 -- File Downloader
 local function downloadFile(path)
-    local localPath = path
-	
-	if not isfile(localPath) then
-		ezError("File not found locally: " .. tostring(localPath))
-		return nil
+	if not isfile(path) then
+		local folder = path:match('^(.*)[/\\][^/\\]+$')
+		if folder and not isfolder(folder) then makefolder(folder) end
+		local suc, res = pcall(function()
+			local cleanPath = path:gsub('^weedhack/', '')
+			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/'..cleanPath..'?t='..tostring(os.time()), true)
+		end)
+		if not suc or type(res) ~= 'string' or res:match('^404') or res:match('^403') then
+			ezError("Failed to download: " .. tostring(path))
+			return nil
+		end
+		if path:find('%.lua$') then
+			res = '--[ezvape auto-sync header]\n'..res
+		end
+		writefile(path, res)
 	end
 	
-	local content = readfile(localPath)
+	local content = readfile(path)
 	return stripBOM(content)
 end
 
