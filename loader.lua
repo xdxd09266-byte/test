@@ -61,6 +61,7 @@ end
 local function downloadFile(path)
 	if not isfile(path) then
 		local folder = path:match('^(.*)[/\\][^/\\]+$')
+		local folder = path:match('^(.*)[/\\\\][^/\\\\]+$')
 		if folder and not isfolder(folder) then makefolder(folder) end
 		local suc, res = pcall(function()
 			local cleanPath = path:gsub('^weedhack/', '')
