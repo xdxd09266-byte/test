@@ -5,9 +5,6 @@ local args = {...}
 if not game:IsLoaded() then game.Loaded:Wait() end
 if shared.vape then pcall(function() shared.vape:Uninject() end) end
 
--- Developer mode on by default for now to prevent caching issues
-shared.VapeDeveloper = true
-
 -- Modern Executor Environment Normalization
 local getgenv = getgenv or function() return _G end
 local setthreadidentity = setthreadidentity or setidentity or set_thread_identity or function() end
