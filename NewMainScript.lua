@@ -279,244 +279,155 @@ local function authenticateUser()
 		end
 	end
 
-	-- Load Rayfield Gen2 UI library
-	local preRayfieldGuis = {}
-	pcall(function()
-		for _, child in ipairs(game:GetService('CoreGui'):GetChildren()) do
-			preRayfieldGuis[child] = true
-		end
-		local player = game:GetService('Players').LocalPlayer
-		if player then
-			local playerGui = player:FindFirstChild('PlayerGui')
-			if playerGui then
-				for _, child in ipairs(playerGui:GetChildren()) do
-					preRayfieldGuis[child] = true
+	-- Self-contained auth UI (no external UI library required)
+	local authenticated = false
+	local authKey = savedKey or ""
+
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "ezvapeAuth"
+	screenGui.ResetOnSpawn = false
+	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	screenGui.Parent = game:GetService("CoreGui")
+
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(0, 340, 0, 190)
+	frame.Position = UDim2.new(0.5, -170, 0.5, -95)
+	frame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+	frame.BorderSizePixel = 0
+	frame.Active = true
+	frame.Parent = screenGui
+
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1, 0, 0, 32)
+	title.Text = "ezvape Authentication"
+	title.TextColor3 = Color3.fromRGB(255, 255, 255)
+	title.TextSize = 16
+	title.Font = Enum.Font.GothamBold
+	title.BackgroundTransparency = 1
+	title.Parent = frame
+
+	local sub = Instance.new("TextLabel")
+	sub.Size = UDim2.new(1, 0, 0, 20)
+	sub.Position = UDim2.new(0, 0, 0, 32)
+	sub.Text = "by xdxd09266-byte"
+	sub.TextColor3 = Color3.fromRGB(150, 150, 160)
+	sub.TextSize = 12
+	sub.BackgroundTransparency = 1
+	sub.Parent = frame
+
+	local box = Instance.new("TextBox")
+	box.Size = UDim2.new(0.9, 0, 0, 34)
+	box.Position = UDim2.new(0.05, 0, 0, 64)
+	box.PlaceholderText = "Enter your key"
+	box.Text = savedKey
+	box.TextColor3 = Color3.fromRGB(255, 255, 255)
+	box.PlaceholderColor3 = Color3.fromRGB(120, 120, 130)
+	box.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+	box.BorderSizePixel = 0
+	box.TextSize = 14
+	box.ClearTextOnFocus = false
+	box.Parent = frame
+
+	local status = Instance.new("TextLabel")
+	status.Size = UDim2.new(0.9, 0, 0, 22)
+	status.Position = UDim2.new(0.05, 0, 0, 102)
+	status.Text = ""
+	status.TextColor3 = Color3.fromRGB(200, 200, 210)
+	status.TextSize = 13
+	status.BackgroundTransparency = 1
+	status.Parent = frame
+
+	local verifyBtn = Instance.new("TextButton")
+	verifyBtn.Size = UDim2.new(0.44, 0, 0, 36)
+	verifyBtn.Position = UDim2.new(0.05, 0, 0, 130)
+	verifyBtn.Text = "Verify & Unlock"
+	verifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	verifyBtn.BackgroundColor3 = Color3.fromRGB(45, 130, 60)
+	verifyBtn.BorderSizePixel = 0
+	verifyBtn.TextSize = 14
+	verifyBtn.Font = Enum.Font.GothamBold
+	verifyBtn.Parent = frame
+
+	local resetBtn = Instance.new("TextButton")
+	resetBtn.Size = UDim2.new(0.44, 0, 0, 36)
+	resetBtn.Position = UDim2.new(0.51, 0, 0, 130)
+	resetBtn.Text = "Reset Key"
+	resetBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	resetBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 70)
+	resetBtn.BorderSizePixel = 0
+	resetBtn.TextSize = 14
+	resetBtn.Font = Enum.Font.GothamBold
+	resetBtn.Parent = frame
+
+	local function cleanupAuthGuis()
+		pcall(function() screenGui:Destroy() end)
+		pcall(function()
+			for _, child in ipairs(game:GetService('CoreGui'):GetChildren()) do
+				if child:IsA('ScreenGui') and (child.Name:lower():find('rayfield') or child.Name:lower():find('sirius')) then
+					pcall(function() child:Destroy() end)
 				end
 			end
-		end
-	end)
-	local RayfieldSuc, Rayfield = pcall(function()
-		return loadstring(game:HttpGet("https://sirius.menu/gen2"))()
-	end)
-	if not RayfieldSuc or not Rayfield then
-		error("Failed to load Rayfield Gen2 UI library. Check your internet connection.")
-	end
-	
-	-- Detect mobile and use simpler approach if needed
-	local isMobile = game:GetService("UserInputService").TouchEnabled
-	
-	local Window
-	local WindowSuc, WindowErr = pcall(function()
-		return Rayfield:CreateWindow({
-			name = "ezvape Authentication",
-			subtitle = "by xdxd09266-byte"
-		})
-	end)
-	
-	if not WindowSuc then
-		-- Fallback for mobile or if Rayfield window creation fails
-		warn("[ezvape] Rayfield window creation failed: " .. tostring(WindowErr))
-		if isMobile then
-			warn("[ezvape] Mobile detected - using simple input fallback")
-			-- Simple fallback: prompt user via console or simple GUI
-
-			
-			local key = ""
-			-- Use a simple InputBox if available, otherwise use console
-			local screenGui = Instance.new("ScreenGui")
-			screenGui.Parent = game:GetService("CoreGui")
-			
-			local frame = Instance.new("Frame")
-			frame.Size = UDim2.new(0.5, 0, 0.3, 0)
-			frame.Position = UDim2.new(0.25, 0, 0.35, 0)
-			frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-			frame.Parent = screenGui
-			
-			local textBox = Instance.new("TextBox")
-		 textBox.Size = UDim2.new(0.8, 0, 0.3, 0)
-			textBox.Position = UDim2.new(0.1, 0, 0.2, 0)
-			textBox.PlaceholderText = "Enter your key"
-			textBox.Text = ""
-			textBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-			textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-			textBox.Parent = frame
-			
-			local submitButton = Instance.new("TextButton")
-			submitButton.Size = UDim2.new(0.4, 0, 0.2, 0)
-			submitButton.Position = UDim2.new(0.3, 0, 0.6, 0)
-			submitButton.Text = "Submit"
-			submitButton.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-			submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-			submitButton.Parent = frame
-			
-			local statusLabel = Instance.new("TextLabel")
-			statusLabel.Size = UDim2.new(0.8, 0, 0.2, 0)
-			statusLabel.Position = UDim2.new(0.1, 0, 0.8, 0)
-			statusLabel.Text = "Enter your key to continue"
-			statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-			statusLabel.BackgroundTransparency = 1
-			statusLabel.Parent = frame
-			
-			local authenticated = false
-			
-			submitButton.MouseButton1Click:Connect(function()
-				key = textBox.Text:gsub("%s+", "")
-				statusLabel.Text = "Verifying..."
-				
-				keyList = fetchKeys() or keyList
-				local valid, msg, keyInfo = validateKey(key, keyList)
-				
-				if valid then
-					statusLabel.Text = "[+] Success!"
-					writefile("weedhack/profiles/key.txt", key)
-					
-					task.spawn(function()
-						sendAnalyticsWebhook(keyInfo, key)
-					end)
-					
-					task.wait(0.5)
-					screenGui:Destroy()
-					authenticated = true
-				else
-					statusLabel.Text = "[-] " .. tostring(msg)
-				end
-			end)
-			
-			repeat task.wait() until authenticated
-			return authenticated
-		else
-			error("Rayfield window creation failed: " .. tostring(WindowErr))
-		end
-	end
-	
-	Window = WindowErr
-
-	local authenticated = false
-	local currentKeyInput = savedKey or ""
-
-	local Tab = Window:CreateTab({
-		name = "Authentication"
-	})
-
-	local keyInput = Tab:CreateInput({
-		name = "Enter Key",
-		value = savedKey ~= "" and savedKey or "",
-		placeholder = "ezvape-XXXX-XXXX-XXXX",
-		flag = "ezvape_key_input",
-		callback = function(Text)
-			currentKeyInput = Text:gsub("%s+", "")
-		end
-	})
-
-	local function verify()
-		local keyToVerify = currentKeyInput
-		if keyToVerify == "" then
-			keyToVerify = savedKey
-		end
-
-		if not keyToVerify or keyToVerify == "" then
-			Window:Notify({
-				title = "Error",
-				content = "[-] Please enter your key!",
-				duration = 3
-			})
-			return
-		end
-        
-		Window:Notify({
-			title = "Verifying",
-			content = "[-] Verifying...",
-			duration = 2
-		})
-		
-		keyList = fetchKeys() or keyList
-		local valid, msg, keyInfo = validateKey(keyToVerify, keyList)
-		
-		if valid then
-			Window:Notify({
-				title = "Success",
-				content = "[+] Access Granted! Loading...",
-				duration = 2
-			})
-			writefile("weedhack/profiles/key.txt", keyToVerify)
-			
-			task.spawn(function()
-				sendAnalyticsWebhook(keyInfo, keyToVerify)
-			end)
-			
-			task.wait(0.5)
-			authenticated = true
-			task.spawn(function()
-				task.wait(1)
-				pcall(function()
-					if Rayfield and type(Rayfield.Destroy) == "function" then
-						pcall(function() Rayfield:Destroy() end)
-					end
-					local destroyed = 0
-				local function cleanGuis(parent)
-					if not parent then return end
-					for _, child in ipairs(parent:GetChildren()) do
-						if child:IsA('ScreenGui') and (child.Name:lower():find('rayfield') or child.Name:lower():find('sirius') or child.Name:lower():find('ezvape')) and not preRayfieldGuis[child] then
-							child:Destroy()
-							destroyed = destroyed + 1
-						end
-					end
-				end
-				cleanGuis(game:GetService('CoreGui'))
-				pcall(function()
-					local robloxGui = game:GetService('CoreGui'):FindFirstChild('RobloxGui')
-					if robloxGui then
-						for _, layer in ipairs(robloxGui:GetChildren()) do
-							if layer:IsA('ScreenGui') then
-								for _, win in ipairs(layer:GetChildren()) do
-									if win:IsA('ScreenGui') and win.Name:lower():find('ezvape') and not preRayfieldGuis[win] then
-										win:Destroy()
-										destroyed = destroyed + 1
-									end
-								end
+		end)
+		pcall(function()
+			local robloxGui = game:GetService('CoreGui'):FindFirstChild('RobloxGui')
+			if robloxGui then
+				for _, layer in ipairs(robloxGui:GetChildren()) do
+					if layer:IsA('ScreenGui') then
+						for _, win in ipairs(layer:GetChildren()) do
+							if win:IsA('ScreenGui') and win.Name:lower():find('ezvape') then
+								pcall(function() win:Destroy() end)
 							end
 						end
 					end
-				end)
-					local player = game:GetService('Players').LocalPlayer
-					if player and player:FindFirstChild('PlayerGui') then
-						cleanGuis(player.PlayerGui)
-					end
-					print('[ezvape] rayfield cleanup: destroyed ' .. tostring(destroyed) .. ' leftover screen guis')
-				end)
+				end
+			end
+		end)
+	end
+
+	local function verify()
+		local keyToVerify = box.Text:gsub("%s+", "")
+		if keyToVerify == "" then keyToVerify = savedKey end
+		if not keyToVerify or keyToVerify == "" then
+			status.Text = "[-] Please enter your key!"
+			status.TextColor3 = Color3.fromRGB(255, 120, 120)
+			return
+		end
+		status.Text = "[i] Verifying..."
+		status.TextColor3 = Color3.fromRGB(200, 200, 210)
+		local fetched = fetchKeys() or keyList
+		local valid, msg, keyInfo = validateKey(keyToVerify, fetched)
+		if valid then
+			status.Text = "[+] Access Granted! Loading..."
+			status.TextColor3 = Color3.fromRGB(120, 255, 140)
+			pcall(function() writefile("weedhack/profiles/key.txt", keyToVerify) end)
+			task.spawn(function()
+				sendAnalyticsWebhook(keyInfo, keyToVerify)
 			end)
+			task.wait(0.6)
+			authenticated = true
+			cleanupAuthGuis()
 		else
-			Window:Notify({
-				title = "Error",
-				content = "[-] " .. tostring(msg),
-				duration = 5
-			})
+			status.Text = "[-] " .. tostring(msg)
+			status.TextColor3 = Color3.fromRGB(255, 120, 120)
 		end
 	end
 
-	Tab:CreateButton({
-		name = "Verify & Unlock",
-		callback = verify
-	})
-
-	Tab:CreateButton({
-		name = "Reset Key",
-		callback = function()
-			if isfile("weedhack/profiles/key.txt") then
-				delfile("weedhack/profiles/key.txt")
-			end
-			savedKey = ""
-			currentKeyInput = ""
-			keyInput:Set("", true)
-			Window:Notify({
-				title = "Success",
-				content = "[+] Key cleared! Please enter a new key.",
-				duration = 3
-			})
-		end
-	})
+	verifyBtn.MouseButton1Click:Connect(verify)
+	box.FocusLost:Connect(function(enterPressed)
+		if enterPressed then verify() end
+	end)
+	resetBtn.MouseButton1Click:Connect(function()
+		pcall(function()
+			if isfile("weedhack/profiles/key.txt") then delfile("weedhack/profiles/key.txt") end
+		end)
+		savedKey = ""
+		box.Text = ""
+		status.Text = "[i] Key cleared! Enter a new key."
+		status.TextColor3 = Color3.fromRGB(200, 200, 210)
+	end)
 
 	repeat task.wait() until authenticated
+	pcall(function() screenGui:Destroy() end)
 	return authenticated
 end
 
