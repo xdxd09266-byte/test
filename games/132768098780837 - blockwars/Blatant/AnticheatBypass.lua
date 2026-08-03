@@ -3,9 +3,8 @@ overParams.RespectCanCollide = true
 
 local function clampVec(vec, max)
 	if vec.Magnitude > max then
-		return vec.Unit == vec.Unit and vec.Unit * max or Vector3.zero
+		return vec.Unit * max
 	end
-
 	return vec
 end
 
@@ -22,9 +21,9 @@ AnticheatBypass = vape.Categories.Blatant:CreateModule({
 			bypassRoot.Parent = workspace.CurrentCamera
 			AnticheatBypass:Clean(bypassRoot)
 
-			local oldcf, oldvelo
+			local oldcf
 			local bindKey = game:GetService('HttpService'):GenerateGUID(true)
-			runService:BindToRenderStep(bindKey, 0, function()
+			runService:BindToRenderStep(bindKey, 2000, function()
 				if entitylib.isAlive and oldcf then
 					entitylib.character.RootPart.CFrame = oldcf
 				end
@@ -34,17 +33,36 @@ AnticheatBypass = vape.Categories.Blatant:CreateModule({
 				runService:UnbindFromRenderStep(bindKey)
 			end)
 
-			for _, connection in {entitylib.Events.LocalAdded, replicatedStorage.GameEvents.BedWarsRemotes.AntiCheat_Strike.OnClientEvent} do
-				AnticheatBypass:Clean(connection:Connect(function()
-					oldcf = nil
-				end))
-			end
+			AnticheatBypass:Clean(entitylib.Events.LocalAdded:Connect(function()
+				oldcf = nil
+			end))
+
+            task.spawn(function()
+                local remotes = replicatedStorage:WaitForChild("GameEvents", 10)
+                if remotes then
+                    local bwRemotes = remotes:WaitForChild("BedWarsRemotes", 5)
+                    if bwRemotes then
+                        local strike = bwRemotes:WaitForChild("AntiCheat_Strike", 5)
+                        if strike and AnticheatBypass.Enabled then
+                            AnticheatBypass:Clean(strike.OnClientEvent:Connect(function()
+                                oldcf = nil
+                            end))
+                        end
+                    end
+                end
+            end)
 
 			local tpTimer = 0
 			local fallTimer = 0
 			AnticheatBypass:Clean(runService.Heartbeat:Connect(function(dt)
 				if entitylib.isAlive then
 					local root = entitylib.character.RootPart
+					
+					-- Auto-detect server rubberbands (sudden snaps)
+					if oldcf and (root.Position - oldcf.Position).Magnitude > 8 then
+						oldcf = nil
+					end
+
 					if not oldcf then
 						bypassRoot.CFrame = root.CFrame
 					end
@@ -55,7 +73,8 @@ AnticheatBypass = vape.Categories.Blatant:CreateModule({
 					united = united == united and diff.Magnitude > 0.1 and united * entitylib.character.Humanoid.WalkSpeed or Vector3.zero
 					bypassRoot.AssemblyLinearVelocity = Vector3.new(united.X, 0, united.Z)
 					bypassRoot.CFrame = CFrame.lookAlong(Vector3.new(bypassRoot.Position.X, root.Position.Y, bypassRoot.Position.Z), root.CFrame.LookVector)
-					if diff.Magnitude > 6 and (os.clock() - tpTimer) > 0.75 then
+					
+					if diff.Magnitude > 4 and (os.clock() - tpTimer) > 0.5 then
 						bypassRoot.CFrame += clampVec(diff, entitylib.character.Humanoid.WalkSpeed)
 						tpTimer = os.clock()
 					end
@@ -63,6 +82,7 @@ AnticheatBypass = vape.Categories.Blatant:CreateModule({
 					overParams.CollisionGroup = root.CollisionGroup
 					overParams.FilterDescendantsInstances = {lplr.Character, gameCamera}
 					local flyCheck = workspace:Raycast(bypassRoot.Position, Vector3.new(0, -8, 0), overParams)
+					
 					if not flyCheck then
 						if fallTimer == 0 then
 							fallTimer = os.clock()
@@ -79,11 +99,12 @@ AnticheatBypass = vape.Categories.Blatant:CreateModule({
 				else
 					bypassRoot.CFrame = CFrame.new()
 					bypassRoot.AssemblyLinearVelocity = Vector3.zero
+                    oldcf = nil
 				end
 			end))
 		else
 			bypassRoot = nil
 		end
 	end,
-	Tooltip = 'Using various methods to bypass the Anticheat.'
+	Tooltip = 'Uses physics desync to bypass server movement checks.'
 })
