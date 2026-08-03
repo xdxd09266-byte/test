@@ -401,7 +401,7 @@ local function authenticateUser()
 				local valid, msg, keyInfo = validateKey(key, keyList)
 				
 				if valid then
-					statusLabel.Text = "âœ… Success!"
+					statusLabel.Text = "[+] Success!"
 					writefile("weedhack/profiles/key.txt", key)
 					
 					task.spawn(function()
@@ -412,7 +412,7 @@ local function authenticateUser()
 					screenGui:Destroy()
 					authenticated = true
 				else
-					statusLabel.Text = "âŒ " .. tostring(msg)
+					statusLabel.Text = "[-] " .. tostring(msg)
 				end
 			end)
 			
@@ -451,7 +451,7 @@ local function authenticateUser()
 		if not keyToVerify or keyToVerify == "" then
 			Window:Notify({
 				title = "Error",
-				content = "âŒ Please enter your key!",
+				content = "[-] Please enter your key!",
 				duration = 3
 			})
 			return
@@ -459,7 +459,7 @@ local function authenticateUser()
         
 		Window:Notify({
 			title = "Verifying",
-			content = "â³ Verifying...",
+			content = "[-] Verifying...",
 			duration = 2
 		})
 		
@@ -469,7 +469,7 @@ local function authenticateUser()
 		if valid then
 			Window:Notify({
 				title = "Success",
-				content = "âœ… Access Granted! Loading...",
+				content = "[+] Access Granted! Loading...",
 				duration = 2
 			})
 			writefile("weedhack/profiles/key.txt", keyToVerify)
@@ -507,7 +507,7 @@ local function authenticateUser()
 		else
 			Window:Notify({
 				title = "Error",
-				content = "âŒ " .. tostring(msg),
+				content = "[-] " .. tostring(msg),
 				duration = 5
 			})
 		end
@@ -529,7 +529,7 @@ local function authenticateUser()
 			keyInput:Set("", true)
 			Window:Notify({
 				title = "Success",
-				content = "âœ… Key cleared! Please enter a new key.",
+				content = "[+] Key cleared! Please enter a new key.",
 				duration = 3
 			})
 		end
