@@ -45,11 +45,11 @@ Killaura = vape.Categories.Blatant:CreateModule({
 				if tool then
 					local plrs = entitylib.AllPosition({
 						Range = AttackRange.Value,
-						Wallcheck = Targets.Walls.Enabled or nil,
+						Wallcheck = Targets.Walls and Targets.Walls.Enabled or nil,
 						Origin = bypassRoot and bypassRoot.Position or nil,
 						Part = 'RootPart',
-						Players = Targets.Players.Enabled,
-						NPCs = Targets.NPCs.Enabled,
+						Players = Targets.Players and Targets.Players.Enabled,
+						NPCs = Targets.NPCs and Targets.NPCs.Enabled,
 						Limit = Max.Value
 					})
 
