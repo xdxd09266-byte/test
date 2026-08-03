@@ -577,25 +577,34 @@ if not shared.VapeDeveloper and not isfile('weedhack/profiles/local.txt') then
 	end
 end
 
--- Safely download and execute main.lua
-ezLog('inject: auth passed, downloading main.lua')
-local mainScriptSource = downloadFile('weedhack/main.lua')
+-- Safely download and execute loader.lua
+ezLog('inject: auth passed, downloading loader.lua')
+local mainScriptSource = downloadFile('loader.lua') -- Download to workspace root
+if not mainScriptSource then
+    -- Try fetching directly if downloadFile failed (e.g., path mismatch)
+    local suc, res = pcall(function()
+        return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/loader.lua?t='..tostring(os.time()), true)
+    end)
+    if suc and type(res) == 'string' and not res:match('^%d%d%d:') then
+        mainScriptSource = res
+    end
+end
 
 if mainScriptSource then
-	local mainFunc, err = loadstring(mainScriptSource, "main")
+	local mainFunc, err = loadstring(mainScriptSource, "loader")
 	if type(mainFunc) == "function" then
-		ezLog('inject: main.lua compiled, executing')
+		ezLog('inject: loader.lua compiled, executing')
 		local success, runtimeErr = pcall(mainFunc)
 		if not success then
-			ezError('main.lua crashed:\n' .. tostring(runtimeErr))
+			ezError('loader.lua crashed:\n' .. tostring(runtimeErr))
 		else
-			ezLog('inject: main.lua finished without error')
-			ezSuccess('ezvape finished loading.\nIf no menu appeared: press the button in the TOP RIGHT (mobile) or RightShift (PC).\nIf a red error panel appeared earlier, screenshot it.')
+			ezLog('inject: loader.lua finished without error')
+			ezSuccess('ezvape loader finished.\nIf no menu appeared: press the button in the TOP RIGHT (mobile) or RightShift (PC).')
 		end
 	else
-		ezError('Syntax error in main.lua:\n' .. tostring(err))
+		ezError('Syntax error in loader.lua:\n' .. tostring(err))
 	end
 else
-	ezError('Failed to download weedhack/main.lua (network blocked?)')
+	ezError('Failed to download loader.lua (network blocked?)')
 end
 
