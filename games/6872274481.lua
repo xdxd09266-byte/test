@@ -9991,5 +9991,93 @@ DarkMode = vape.Legit:CreateModule({
 	end,
 	Tooltip = 'Changes BedWars HUD to dark mode (#141413)'
 })
+	local Disabler
+	Disabler = vape.Categories.Blatant:CreateModule({
+		Name = "Disabler",
+		Function = function(callback)
+			if callback then
+				task.spawn(function()
+					local momentumRemote = game:GetService("ReplicatedStorage"):WaitForChild("rbxts_include"):WaitForChild("node_modules"):WaitForChild("@rbxts"):WaitForChild("net"):WaitForChild("out"):WaitForChild("_NetManaged"):WaitForChild("MomentumUpdate", 2)
+					repeat
+						if momentumRemote then
+							pcall(function()
+								momentumRemote:FireServer({
+									momentumValue = 1e15/math.random()
+								})
+							end)
+						end
+						task.wait()
+					until not Disabler.Enabled
+				end)
+			end
+		end,
+		Tooltip = "Floods MomentumUpdate to disable anticheat checks."
+	})
+
+	local TPaura
+	TPaura = vape.Categories.Blatant:CreateModule({
+		Name = "TP Aura",
+		Function = function(callback)
+			if callback then
+				task.spawn(function()
+					local plr = lplr
+					local mouse = plr:GetMouse()
+					local char = plr.Character
+					local root = char and char:FindFirstChild("HumanoidRootPart")
+					if not root then return end
+					
+					local orig = root.Position
+					local cam = workspace.CurrentCamera
+					
+					local anchor = Instance.new("Part")
+					anchor.Size = Vector3.new(2,1,2)
+					anchor.Transparency = 1
+					anchor.Anchored = true
+					anchor.CanCollide = false
+					anchor.Position = orig
+					anchor.Parent = workspace
+					
+					cam.CameraSubject = anchor
+					cam.CameraType = Enum.CameraType.Custom
+					
+					repeat
+						local target = nil
+						local dist = math.huge
+						local mpos = mouse.Hit.Position
+						
+						for _, p in pairs(game:GetService("Players"):GetPlayers()) do
+							if p ~= plr and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+								if plr.Team ~= p.Team then
+									local d = (p.Character.HumanoidRootPart.Position - mpos).Magnitude
+									if d < dist then
+										dist = d
+										target = p
+									end
+								end
+							end
+						end
+						
+						if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+							root.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(0, 15, 0)
+						else
+							root.CFrame = CFrame.new(orig)
+						end
+						
+						task.wait()
+					until not TPaura.Enabled
+					
+					if cam.CameraSubject == anchor then
+						cam.CameraSubject = char and char:FindFirstChild("Humanoid") or plr.Character and plr.Character:FindFirstChild("Humanoid")
+					end
+					cam.CameraType = Enum.CameraType.Custom
+					anchor:Destroy()
+					if char and char:FindFirstChild("HumanoidRootPart") then
+						char.HumanoidRootPart.CFrame = CFrame.new(orig)
+					end
+				end)
+			end
+		end,
+		Tooltip = "Teleports to enemies for extreme aura reach."
+	})
 
 end)

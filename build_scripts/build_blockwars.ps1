@@ -1,10 +1,9 @@
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $privateDir = Join-Path $scriptDir "..\private"
 $gamesDir = Join-Path $scriptDir "..\games"
-$gameCompiledPath = Join-Path $scriptDir "..\build\inject_bedwars.lua"
-$gameSourceDir = Join-Path $privateDir "games\bedwars\6872274481 - game"
-$lobbySourceDir = Join-Path $privateDir "games\bedwars\6872265039 - lobby"
-$gameBaseDir = Join-Path $gamesDir "bedwars\6872274481 - game"
+$gameCompiledPath = Join-Path $scriptDir "..\build\inject_blockwars.lua"
+$gameSourceDir = Join-Path $privateDir "games\132768098780837 - blockwars"
+$gameBaseDir = Join-Path $gamesDir "132768098780837 - blockwars"
 
 # Ensure the build directory exists
 if (-not (Test-Path (Join-Path $scriptDir "..\build"))) {
@@ -25,7 +24,7 @@ if (Test-Path $baseFile) {
 }
 
 # Then compile feature modules from both private and public directories
-$featureTypes = @("Blatant", "Legit", "Utility")
+$featureTypes = @("Blatant", "Legit", "Utility", "Visuals", "World")
 foreach ($type in $featureTypes) {
     # Public directory
     $publicFeatureDir = Join-Path $gameBaseDir $type
@@ -48,18 +47,15 @@ foreach ($type in $featureTypes) {
     }
 }
 
-# Compile lobby features (if any, though current focus is game)
-$compiledLobby = ""
-if (Test-Path $lobbySourceDir) {
-    Get-ChildItem -Path $lobbySourceDir -Filter "*.lua" -Recurse | ForEach-Object {
-        $compiledLobby += "`nrun(function()`n"
-        $compiledLobby += (Get-Content $_.FullName -Raw -Encoding UTF8)
-        $compiledLobby += "`nend)`n"
-    }
-}
-
-# Write the compiled game features to a temporary file (UTF-8 WITHOUT BOM - Luau chokes on BOM bytes)
+# Write the compiled game features to a temporary file (UTF-8 WITHOUT BOM)
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText($gameCompiledPath, $compiledGame, $utf8NoBom)
 
-Write-Host "[+] Compiled BedWars game features to -> $gameCompiledPath"
+# Also copy to local workspace if we have real/workspace setup
+$localWorkspace = "$env:LOCALAPPDATA\Real\workspace\build"
+if (Test-Path $localWorkspace) {
+    Copy-Item $gameCompiledPath -Destination (Join-Path $localWorkspace "inject_blockwars.lua") -Force
+    Write-Host "[+] Copied to Executor Workspace: $localWorkspace\inject_blockwars.lua"
+}
+
+Write-Host "[+] Compiled BlockWars game features to -> $gameCompiledPath"

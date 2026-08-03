@@ -260,6 +260,22 @@ vape.Libraries.auraanims = {
 		{CFrame = CFrame.new(-0.56, -0.86, 0.23) * CFrame.Angles(math.rad(-167), math.rad(49), math.rad(-1)), Time = 0.03}
 	},
 	Random = {},
+	Old = {
+		{CFrame = CFrame.new(1.29, -0.86, 0.06) * CFrame.Angles(math.rad(-30), math.rad(130), math.rad(60)), Time = 0.12},
+		{CFrame = CFrame.new(1.39, -0.86, 0.26) * CFrame.Angles(math.rad(-10), math.rad(50), math.rad(80)), Time = 0.12},
+	},
+	Astral = {
+		{CFrame = CFrame.new(0.3, -1, -1) * CFrame.Angles(-math.rad(190), math.rad(55), -math.rad(90)), Time = 0.2},
+		{CFrame = CFrame.new(0.3, -1, -0.1) * CFrame.Angles(-math.rad(190), math.rad(110), -math.rad(90)), Time = 0.2},
+	},
+	Astral2 = {
+		{CFrame = CFrame.new(0.7, -0.7, 0.8) * CFrame.Angles(math.rad(-16), math.rad(60), math.rad(-80)), Time = 0.2},
+		{CFrame = CFrame.new(0.95, -1.06, -2.25) * CFrame.Angles(math.rad(-179), math.rad(61), math.rad(80)), Time = 0.2}
+	},
+	Zyla = {
+		{CFrame = CFrame.new(0.3, -1.5, 1.5) * CFrame.Angles(math.rad(120), math.rad(140), math.rad(320)), Time = 0.1},
+		{CFrame = CFrame.new(0.3, -2, 0.5) * CFrame.Angles(-math.rad(190), math.rad(110), -math.rad(90)), Time = 0.3},
+	},
 	['Horizontal Spin'] = {
 		{CFrame = CFrame.Angles(math.rad(-10), math.rad(-90), math.rad(-80)), Time = 0.12},
 		{CFrame = CFrame.Angles(math.rad(-10), math.rad(180), math.rad(-80)), Time = 0.12},

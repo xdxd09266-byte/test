@@ -29,16 +29,30 @@ local function downloadFile(path, func)
 end
 
 vape.Place = 6872274481
-if isfile('weedhack/games/'..vape.Place..'.lua') then
-	loadstring(readfile('weedhack/games/'..vape.Place..'.lua'), 'bedwars')()
-else
-	if not shared.VapeDeveloper then
-		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/games/'..vape.Place..'.lua', true)
-		end)
-		if suc and res ~= '404: Not Found' then
-			loadstring(downloadFile('weedhack/games/'..vape.Place..'.lua'), 'bedwars')()
+local function runGameModule()
+	local fileSource = ''
+	if isfile('build/'..vape.Place..'.lua') then
+		fileSource = readfile('build/'..vape.Place..'.lua')
+	elseif isfile('weedhack/games/'..vape.Place..'.lua') then
+		fileSource = readfile('weedhack/games/'..vape.Place..'.lua')
+	else
+		if not shared.VapeDeveloper then
+			local suc, res = pcall(function()
+				return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/games/'..vape.Place..'.lua', true)
+			end)
+			if suc and res ~= '404: Not Found' then
+				fileSource = downloadFile('weedhack/games/'..vape.Place..'.lua')
+			end
+		end
+	end
+
+	if fileSource ~= '' then
+		local func = loadstring(fileSource, 'bedwars')
+		if type(func) == "function" then
+			func()
 		end
 	end
 end
+
+runGameModule()
 

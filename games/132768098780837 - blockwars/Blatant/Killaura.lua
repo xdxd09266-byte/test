@@ -81,7 +81,7 @@ Killaura = vape.Categories.Blatant:CreateModule({
 								continue
 							end
 
-							local hitCount = InstaKill and InstaKill.Enabled and 50 or 1
+							local hitCount = InstaKill and InstaKill.Enabled and 200 or 1
 							for _ = 1, hitCount do
 								replicatedStorage.GameEvents.CombatRemotes.Combat_FeintSwing:FireServer()
 								replicatedStorage.GameEvents.CombatRemotes.Combat_RequestAttack:FireServer(tool:GetAttribute('WeaponType'), v.Character)

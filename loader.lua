@@ -58,34 +58,12 @@ local function stripBOM(str)
 end
 
 -- File Downloader
-local repoUrl = 'https://raw.githubusercontent.com/xdxd09266-byte/test/main/'
 local function downloadFile(path)
     local localPath = path
-    local urlPath = path:gsub('^weedhack/', '')
-    
-    -- Force redownload if developer mode is on
-    if shared.VapeDeveloper and isfile(localPath) then
-        pcall(delfile, localPath)
-    end
-    
+	
 	if not isfile(localPath) then
-		local folder = localPath:match('^(.*)[/\\][^/\\]+$')
-		if folder and not isfolder(folder) then makefolder(folder) end
-		
-		local suc, res = pcall(function()
-			return game:HttpGet(repoUrl .. urlPath .. '?t=' .. tostring(os.time()), true)
-		end)
-		
-		if not suc or type(res) ~= 'string' or res:match('^404') or res:match('^403') or res:match('^%d%d%d:') then
-			return nil
-		end
-		
-		res = stripBOM(res)
-		
-		if localPath:find('%.lua$') then
-			res = '--[ezvape sync]\n' .. res
-		end
-		writefile(localPath, res)
+		ezError("File not found locally: " .. tostring(localPath))
+		return nil
 	end
 	
 	local content = readfile(localPath)
@@ -149,6 +127,9 @@ if not shared.VapeIndependent then
 
 	-- Place-Specific Game Script
 	local placeId = tostring(game.PlaceId)
+	if game.GameId == 2603217424 then
+		placeId = "6872274481"
+	end
     
     -- Local build override support (for fast dev without pushing to github)
     local localGamePath = 'build/'..placeId..'.lua'
@@ -195,7 +176,9 @@ if not shared.VapeIndependent then
                     local teleportScript = [[
                         shared.vapereload = true
                         shared.VapeDeveloper = true
-                        loadstring(game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/loader.lua'))()
+                        if isfile("loader.lua") then
+                            loadstring(readfile("loader.lua"))()
+                        end
                     ]]
                     if queue_on_teleport then pcall(function() queue_on_teleport(teleportScript) end) end
                 end
