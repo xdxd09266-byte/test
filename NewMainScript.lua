@@ -1,51 +1,17 @@
 -- Safely get global functions, fallback to stubs if not available
-local readfile
-local success = pcall(function() readfile = readfile end)
-if not success or type(readfile) ~= "function" then
-	readfile = function() return "" end
+local readfile = readfile or function() return "" end
+local writefile = writefile or function() end
+local makefolder = makefolder or function() end
+local isfolder = isfolder or function() return false end
+local listfiles = listfiles or function() return {} end
+local isfile = isfile or function(file)
+	local suc, res = pcall(function()
+		return readfile(file)
+	end)
+	return suc and res ~= nil and res ~= ''
 end
-
-local writefile
-success = pcall(function() writefile = writefile end)
-if not success or type(writefile) ~= "function" then
-	writefile = function() end
-end
-
-local makefolder
-success = pcall(function() makefolder = makefolder end)
-if not success or type(makefolder) ~= "function" then
-	makefolder = function() end
-end
-
-local isfolder
-success = pcall(function() isfolder = isfolder end)
-if not success or type(isfolder) ~= "function" then
-	isfolder = function() return false end
-end
-
-local listfiles
-success = pcall(function() listfiles = listfiles end)
-if not success or type(listfiles) ~= "function" then
-	listfiles = function() return {} end
-end
-
-local isfile
-success = pcall(function() isfile = isfile end)
-if not success or type(isfile) ~= "function" then
-	isfile = function(file)
-		local suc, res = pcall(function()
-			return readfile(file)
-		end)
-		return suc and res ~= nil and res ~= ''
-	end
-end
-
-local delfile
-success = pcall(function() delfile = delfile end)
-if not success or type(delfile) ~= "function" then
-	delfile = function(file)
-		writefile(file, '')
-	end
+local delfile = delfile or function(file)
+	writefile(file, '')
 end
 
 local function downloadFile(path, func)
@@ -487,16 +453,31 @@ local function authenticateUser()
 						pcall(function() Rayfield:Destroy() end)
 					end
 					local destroyed = 0
-					local function cleanGuis(parent)
-						if not parent then return end
-						for _, child in ipairs(parent:GetChildren()) do
-							if child:IsA('ScreenGui') and (child.Name:lower():find('rayfield') or child.Name == "Sirius") and not preRayfieldGuis[child] then
-								child:Destroy()
-								destroyed = destroyed + 1
+				local function cleanGuis(parent)
+					if not parent then return end
+					for _, child in ipairs(parent:GetChildren()) do
+						if child:IsA('ScreenGui') and (child.Name:lower():find('rayfield') or child.Name:lower():find('sirius') or child.Name:lower():find('ezvape')) and not preRayfieldGuis[child] then
+							child:Destroy()
+							destroyed = destroyed + 1
+						end
+					end
+				end
+				cleanGuis(game:GetService('CoreGui'))
+				pcall(function()
+					local robloxGui = game:GetService('CoreGui'):FindFirstChild('RobloxGui')
+					if robloxGui then
+						for _, layer in ipairs(robloxGui:GetChildren()) do
+							if layer:IsA('ScreenGui') then
+								for _, win in ipairs(layer:GetChildren()) do
+									if win:IsA('ScreenGui') and win.Name:lower():find('ezvape') and not preRayfieldGuis[win] then
+										win:Destroy()
+										destroyed = destroyed + 1
+									end
+								end
 							end
 						end
 					end
-					cleanGuis(game:GetService('CoreGui'))
+				end)
 					local player = game:GetService('Players').LocalPlayer
 					if player and player:FindFirstChild('PlayerGui') then
 						cleanGuis(player.PlayerGui)
@@ -580,7 +561,7 @@ end
 -- Safely download and execute loader.lua
 ezLog('inject: auth passed, downloading loader.lua')
 local mainScriptSource = downloadFile('loader.lua') -- Download to workspace root
-if not mainScriptSource then
+if not mainScriptSource or mainScriptSource == '' then
     -- Try fetching directly if downloadFile failed (e.g., path mismatch)
     local suc, res = pcall(function()
         return game:HttpGet('https://raw.githubusercontent.com/xdxd09266-byte/test/main/loader.lua?t='..tostring(os.time()), true)
