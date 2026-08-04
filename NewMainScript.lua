@@ -328,6 +328,26 @@ local function authenticateUser()
 	box.ClearTextOnFocus = false
 	box.Parent = frame
 
+	local realKey = savedKey or ""
+	local MASK = "•"
+	local function refreshMask()
+		box.Text = string.rep(MASK, #realKey)
+		box.CursorPosition = #realKey + 1
+	end
+	refreshMask()
+	box.TextChanged:Connect(function()
+		local shown = box.Text
+		if shown == string.rep(MASK, #realKey) then
+			return
+		end
+		if #shown < #realKey then
+			realKey = realKey:sub(1, #shown)
+		else
+			realKey = realKey .. shown:sub(#realKey + 1):gsub("•", "")
+		end
+		refreshMask()
+	end)
+
 	local status = Instance.new("TextLabel")
 	status.Size = UDim2.new(0.9, 0, 0, 22)
 	status.Position = UDim2.new(0.05, 0, 0, 102)
@@ -385,7 +405,7 @@ local function authenticateUser()
 	end
 
 	local function verify()
-		local keyToVerify = box.Text:gsub("%s+", "")
+		local keyToVerify = realKey:gsub("%s+", "")
 		if keyToVerify == "" then keyToVerify = savedKey end
 		if not keyToVerify or keyToVerify == "" then
 			status.Text = "[-] Please enter your key!"
@@ -421,6 +441,7 @@ local function authenticateUser()
 			if isfile("weedhack/profiles/key.txt") then delfile("weedhack/profiles/key.txt") end
 		end)
 		savedKey = ""
+		realKey = ""
 		box.Text = ""
 		status.Text = "[i] Key cleared! Enter a new key."
 		status.TextColor3 = Color3.fromRGB(200, 200, 210)

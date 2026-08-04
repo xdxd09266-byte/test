@@ -140,6 +140,11 @@ local getfontsize = function(text, size, font)
 	return textService:GetTextBoundsAsync(fontsize)
 end
 
+local spacepad = function(px, size, font, char)
+	local width = getfontsize(char or ' ', size, font).X
+	return string.rep(char or ' ', math.max(1, math.floor(px / math.max(width, 0.1))))
+end
+
 local function addBlur(parent, notif)
 	local blur = Instance.new('ImageLabel')
 	blur.Name = 'Blur'
@@ -2102,9 +2107,7 @@ components = {
 		toggle.BorderSizePixel = 0
 		toggle.AutoButtonColor = false
 		toggle.Visible = optionsettings.Visible == nil or optionsettings.Visible
-		toggle.Text = optionsettings.Name
-
-		toggle.PaddingLeft = UDim.new(0, 30)
+		toggle.Text = spacepad(30, 14, uipallet.Font, ' ')..optionsettings.Name
 		toggle.TextXAlignment = Enum.TextXAlignment.Left
 		toggle.TextColor3 = color.Dark(uipallet.Text, 0.16)
 		toggle.TextSize = 14
@@ -2681,9 +2684,7 @@ function mainapi:CreateGUI()
 		button.BackgroundColor3 = uipallet.Main
 		button.BorderSizePixel = 0
 		button.AutoButtonColor = false
-		button.Text = categorysettings.Name
-
-		button.PaddingLeft = UDim.new(0, 30)
+		button.Text = spacepad(30, 14, uipallet.Font, ' ')..categorysettings.Name
 		button.TextXAlignment = Enum.TextXAlignment.Left
 		button.TextColor3 = color.Dark(uipallet.Text, 0.16)
 		button.TextSize = 14
@@ -2852,9 +2853,7 @@ function mainapi:CreateGUI()
 			toggle.Size = UDim2.new(1, 0, 0, 40)
 			toggle.BackgroundTransparency = 1
 			toggle.AutoButtonColor = false
-			toggle.Text = togglesettings.Name
-
-			toggle.PaddingLeft = UDim.new(0, 33)
+			toggle.Text = spacepad(33, 14, uipallet.Font, ' ')..togglesettings.Name
 			toggle.TextXAlignment = Enum.TextXAlignment.Left
 			toggle.TextColor3 = color.Dark(uipallet.Text, 0.16)
 			toggle.TextSize = 14
@@ -2897,9 +2896,7 @@ function mainapi:CreateGUI()
 			end
 
 			scale:GetPropertyChangedSignal('Scale'):Connect(function()
-				toggle.Text = togglesettings.Name
-
-				toggle.PaddingLeft = UDim.new(0, 33)
+				toggle.Text = spacepad(33, 14, uipallet.Font, ' ')..togglesettings.Name
 			end)
 			toggle.MouseEnter:Connect(function()
 				hovered = true
@@ -2993,9 +2990,7 @@ function mainapi:CreateGUI()
 		button.BackgroundColor3 = uipallet.Main
 		button.BorderSizePixel = 0
 		button.AutoButtonColor = false
-		button.Text = categorysettings.Name
-
-		button.PaddingLeft = UDim.new(0, 30)
+		button.Text = spacepad(30, 14, uipallet.Font, ' ')..categorysettings.Name
 		button.TextXAlignment = Enum.TextXAlignment.Left
 		button.TextColor3 = color.Dark(uipallet.Text, 0.16)
 		button.TextSize = 14
@@ -3092,9 +3087,7 @@ function mainapi:CreateGUI()
 			window.Size = UDim2.fromOffset(220, 45 + windowlist.AbsoluteContentSize.Y / scale.Scale)
 			for _, v in categoryapi.Buttons do
 				if v.Icon then
-					v.Object.Text = v.Name
-
-					Object.PaddingLeft = UDim.new(0, 33)
+					v.Object.Text = spacepad(33, 14, uipallet.Font, ' ')..v.Name
 				end
 			end
 		end)
@@ -3623,9 +3616,7 @@ function mainapi:CreateGUI()
 		window.Size = UDim2.fromOffset(220, 42 + windowlist.AbsoluteContentSize.Y / scale.Scale)
 		for _, v in categoryapi.Buttons do
 			if v.Icon then
-				v.Object.Text = v.Name
-
-				Object.PaddingLeft = UDim.new(0, 36)
+				v.Object.Text = spacepad(33, 14, uipallet.Font, ' ')..v.Name
 			end
 		end
 	end)
@@ -3732,9 +3723,7 @@ function mainapi:CreateCategory(categorysettings)
 		modulebutton.BackgroundColor3 = uipallet.Main
 		modulebutton.BorderSizePixel = 0
 		modulebutton.AutoButtonColor = false
-		modulebutton.Text = modulesettings.Name
-
-		modulebutton.PaddingLeft = UDim.new(0, 34)
+		modulebutton.Text = spacepad(34, 14, uipallet.Font, ' ')..modulesettings.Name
 		modulebutton.TextXAlignment = Enum.TextXAlignment.Left
 		modulebutton.TextColor3 = color.Dark(uipallet.Text, 0.16)
 		modulebutton.TextSize = 14
