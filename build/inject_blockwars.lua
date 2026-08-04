@@ -727,6 +727,118 @@ Value = Fly:CreateSlider({
 end)
 
 run(function()
+local InfAura
+local targetinfo = vape.Libraries.targetinfo
+local Targets
+local Max
+local Rate
+local Mode
+local delayTable = {}
+local isAttacking = false
+
+local function getSword()
+	local inv = getInventory()
+	for _, tool in inv do
+		if tool:GetAttribute('WeaponType') then
+			return tool
+		end
+	end
+end
+
+local function attackTarget(tool, target, startCF)
+	local swing = replicatedStorage.GameEvents.CombatRemotes.Combat_FeintSwing
+	local attack = replicatedStorage.GameEvents.CombatRemotes.Combat_RequestAttack
+	if swing and attack and swing:IsA('RemoteEvent') and attack:IsA('RemoteEvent') then
+		swing:FireServer()
+		attack:FireServer(tool:GetAttribute('WeaponType'), target.Character)
+	end
+end
+
+InfAura = vape.Categories.Blatant:CreateModule({
+	Name = 'InfAura',
+	Function = function(callback)
+		if callback then
+			repeat
+				isAttacking = false
+				local tool = getSword()
+
+				if tool then
+					if tool.Parent ~= lplr.Character then
+						entitylib.character.Humanoid:EquipTool(tool)
+					end
+
+					local plrs = entitylib.AllPosition({
+						Range = 9e9,
+						Part = 'RootPart',
+						Players = Targets.Players.Enabled,
+						NPCs = Targets.NPCs.Enabled,
+						Limit = Max.Value
+					})
+
+					if #plrs > 0 then
+						isAttacking = true
+						local root = entitylib.character.RootPart
+						local startCF = root.CFrame
+
+						for _, v in plrs do
+							targetinfo.Targets[v] = tick() + 1
+							if (os.clock() - (delayTable[v.Character] or 0)) < Rate.Value then
+								continue
+							end
+
+							if Mode.Value == 'Teleport' then
+								root.CFrame = CFrame.lookAt(v.RootPart.Position + Vector3.new(0, 1, 0), v.RootPart.Position)
+								task.wait(0.05)
+								attackTarget(tool, v, startCF)
+								task.wait(0.05)
+								root.CFrame = startCF
+							else
+								attackTarget(tool, v, startCF)
+							end
+
+							delayTable[v.Character] = os.clock()
+						end
+					end
+				end
+
+				task.wait(0.016)
+			until not InfAura.Enabled
+		else
+			isAttacking = false
+			table.clear(delayTable)
+		end
+	end,
+	Tooltip = 'Attacks every target on the map, no range limit.\nRemote: fires attacks from anywhere.\nTeleport: blinks to each target so hits register server-side.'
+})
+Targets = InfAura:CreateTargets({
+	Players = true,
+	NPCs = true
+})
+Max = InfAura:CreateSlider({
+	Name = 'Max targets',
+	Min = 1,
+	Max = 20,
+	Default = 10
+})
+Rate = InfAura:CreateSlider({
+	Name = 'Attack delay',
+	Min = 0,
+	Max = 1,
+	Decimal = 1000,
+	Default = 0.1,
+	Suffix = 's'
+})
+Mode = InfAura:CreateDropdown({
+	Name = 'Mode',
+	List = {
+		'Remote',
+		'Teleport'
+	}
+})
+
+end)
+
+run(function()
 local InfiniteJump
 local VelocitySlider
 local up = false
@@ -2195,3 +2307,6 @@ AutoBuy = vape.Categories.Inventory:CreateModule({
 })
 
 end)
+
+-- restore saved profile (options, toggles) after module re-creation
+pcall(function() vape:Load() end)

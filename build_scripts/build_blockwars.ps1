@@ -49,6 +49,10 @@ foreach ($type in $featureTypes) {
 
 # Write the compiled game features to a temporary file (UTF-8 WITHOUT BOM)
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+
+# Re-apply saved config after module (re)creation so re-executing the game file never resets user settings
+$compiledGame += "`n-- restore saved profile (options, toggles) after module re-creation`npcall(function() vape:Load() end)`n"
+
 [System.IO.File]::WriteAllText($gameCompiledPath, $compiledGame, $utf8NoBom)
 
 # Also write the deployed game file (served as weedhack/games/132768098780837.lua)

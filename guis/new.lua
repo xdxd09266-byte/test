@@ -2844,7 +2844,7 @@ function mainapi:CreateGUI()
 			toggle.Size = UDim2.new(1, 0, 0, 40)
 			toggle.BackgroundTransparency = 1
 			toggle.AutoButtonColor = false
-			toggle.Text = string.rep(' ', 33 * scale.Scale)..togglesettings.Name
+			toggle.Text = string.rep(' ', 33)..togglesettings.Name
 			toggle.TextXAlignment = Enum.TextXAlignment.Left
 			toggle.TextColor3 = color.Dark(uipallet.Text, 0.16)
 			toggle.TextSize = 14
@@ -2887,7 +2887,7 @@ function mainapi:CreateGUI()
 			end
 
 			scale:GetPropertyChangedSignal('Scale'):Connect(function()
-				toggle.Text = string.rep(' ', 33 * scale.Scale)..togglesettings.Name
+				toggle.Text = string.rep(' ', 33)..togglesettings.Name
 			end)
 			toggle.MouseEnter:Connect(function()
 				hovered = true
@@ -3078,7 +3078,7 @@ function mainapi:CreateGUI()
 			window.Size = UDim2.fromOffset(220, 45 + windowlist.AbsoluteContentSize.Y / scale.Scale)
 			for _, v in categoryapi.Buttons do
 				if v.Icon then
-					v.Object.Text = string.rep(' ', 33 * scale.Scale)..v.Name
+					v.Object.Text = string.rep(' ', 33)..v.Name
 				end
 			end
 		end)
@@ -3607,7 +3607,7 @@ function mainapi:CreateGUI()
 		window.Size = UDim2.fromOffset(220, 42 + windowlist.AbsoluteContentSize.Y / scale.Scale)
 		for _, v in categoryapi.Buttons do
 			if v.Icon then
-				v.Object.Text = string.rep(' ', 36 * scale.Scale)..v.Name
+				v.Object.Text = string.rep(' ', 36)..v.Name
 			end
 		end
 	end)

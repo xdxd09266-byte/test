@@ -15,6 +15,43 @@ local function getSword()
 	end
 end
 
+local function getTarget()
+	local e = vape.Libraries.entity
+	local me = lplr.Character
+	local myTeam = lplr.Team and lplr.Team.Name or ''
+	local myPos = e.character.RootPart.Position
+	local best, bestDist
+
+	for _, ent in pairs(e.List) do
+		local char = ent.Character
+		if not char or char == me or not char.Parent then
+			continue
+		end
+
+		local humanoid = char:FindFirstChild('Humanoid')
+		if not humanoid or humanoid.Health <= 0 then
+			continue
+		end
+
+		local teamId = char:GetAttribute('TeamId')
+		if not teamId or teamId == myTeam then
+			continue
+		end
+
+		local root = ent.RootPart
+		if not root then
+			continue
+		end
+
+		local dist = (root.Position - myPos).Magnitude
+		if dist <= Range.Value and (not bestDist or dist < bestDist) then
+			best, bestDist = ent, dist
+		end
+	end
+
+	return best
+end
+
 TPAura = vape.Categories.Blatant:CreateModule({
 	Name = 'TPAura',
 	Function = function(callback)
@@ -22,29 +59,19 @@ TPAura = vape.Categories.Blatant:CreateModule({
 			repeat
 				local tool = getSword()
 				if tool then
-					local plrs = entitylib.AllPosition({
-						Range = Range.Value,
-						Wallcheck = false,
-						Origin = bypassRoot and bypassRoot.Position or nil,
-						Part = 'RootPart',
-						Players = Targets.Players.Enabled,
-						NPCs = Targets.NPCs.Enabled,
-						Limit = 1
-					})
-
-					if #plrs > 0 then
-						local target = plrs[1]
-						local root = entitylib.character.RootPart
+					local target = getTarget()
+					if target then
+						local e = vape.Libraries.entity
+						local root = e.character.RootPart
 						local startCF = root.CFrame
 						local targetPos = target.RootPart.Position
 
-						root.CFrame = CFrame.lookAt(targetPos + Vector3.new(0, YOffset.Value, 0), targetPos)
-						targetinfo.Targets[target] = tick() + 1
-
 						if tool.Parent ~= lplr.Character then
-							entitylib.character.Humanoid:EquipTool(tool)
+							e.character.Humanoid:EquipTool(tool)
 						end
 
+						root.CFrame = CFrame.lookAt(targetPos + Vector3.new(0, YOffset.Value, 0), targetPos)
+						targetinfo.Targets[target] = tick() + 1
 						task.wait(HitDelay.Value)
 
 						local swing = replicatedStorage.GameEvents.CombatRemotes.Combat_FeintSwing
