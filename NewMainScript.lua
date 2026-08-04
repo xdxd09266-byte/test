@@ -330,22 +330,50 @@ local function authenticateUser()
 
 	local realKey = savedKey or ""
 	local MASK = "•"
+	local function dotCount(s)
+		local n = 0
+		for _ in s:gmatch("•") do n = n + 1 end
+		return n
+	end
+	local function stripDots(s)
+		return (s:gsub("•", ""))
+	end
+	local function dots(n)
+		return string.rep(MASK, n)
+	end
 	local function refreshMask()
-		box.Text = string.rep(MASK, #realKey)
+		box.Text = dots(#realKey)
 		box.CursorPosition = #realKey + 1
 	end
 	refreshMask()
 	box.TextChanged:Connect(function()
 		local shown = box.Text
-		if shown == string.rep(MASK, #realKey) then
+		local shownDots = dotCount(shown)
+		local shownReal = stripDots(shown)
+		local curLen = #realKey
+		if shownDots == curLen and shownReal == "" then
 			return
 		end
-		if #shown < #realKey then
-			realKey = realKey:sub(1, #shown)
-		else
-			realKey = realKey .. shown:sub(#realKey + 1):gsub("•", "")
+		if shownDots < curLen then
+			realKey = realKey:sub(1, shownDots)
+		end
+		if shownReal ~= "" then
+			if shownDots == curLen then
+				realKey = realKey .. shownReal
+			else
+				realKey = shownReal
+			end
 		end
 		refreshMask()
+	end)
+	task.spawn(function()
+		local rs = game:GetService("RunService")
+		while screenGui.Parent do
+			rs.RenderStepped:Wait()
+			if box.Text ~= dots(#realKey) then
+				refreshMask()
+			end
+		end
 	end)
 
 	local status = Instance.new("TextLabel")
@@ -360,7 +388,7 @@ local function authenticateUser()
 	local verifyBtn = Instance.new("TextButton")
 	verifyBtn.Size = UDim2.new(0.44, 0, 0, 36)
 	verifyBtn.Position = UDim2.new(0.05, 0, 0, 130)
-	verifyBtn.Text = "Verify & Unlock"
+	verifyBtn.Text = "Redeem Key"
 	verifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	verifyBtn.BackgroundColor3 = Color3.fromRGB(45, 130, 60)
 	verifyBtn.BorderSizePixel = 0
