@@ -273,6 +273,13 @@ local function authenticateUser()
 			task.spawn(function()
 				sendAnalyticsWebhook(keyInfo, savedKey)
 			end)
+			pcall(function()
+				for _, child in ipairs(game:GetService('CoreGui'):GetChildren()) do
+					if child:IsA('ScreenGui') and child.Name == 'ezvapeAuth' then
+						child:Destroy()
+					end
+				end
+			end)
 			return true
 		else
 			print("[ezvape Auth] Saved key invalid: " .. tostring(msg))

@@ -29,6 +29,15 @@ for _, folder in ipairs({'weedhack', 'weedhack/profiles', 'weedhack/assets', 'we
 	if not isfolder(folder) then makefolder(folder) end
 end
 
+-- Destroy stale auth GUI from previous sessions
+pcall(function()
+	for _, child in ipairs(game:GetService('CoreGui'):GetChildren()) do
+		if child:IsA('ScreenGui') and child.Name == 'ezvapeAuth' then
+			child:Destroy()
+		end
+	end
+end)
+
 -- Logging
 local function ezLog(msg)
 	print('[ezvape] ' .. tostring(msg))
