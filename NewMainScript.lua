@@ -439,7 +439,10 @@ local function authenticateUser()
 		end)
 	end
 
+	local verifying = false
 	local function verify()
+		if verifying then return end
+		verifying = true
 		local keyToVerify = realKey:gsub("%s+", "")
 		if keyToVerify == "" then keyToVerify = savedKey end
 		if not keyToVerify or keyToVerify == "" then
@@ -465,11 +468,18 @@ local function authenticateUser()
 			status.Text = "[-] " .. tostring(msg)
 			status.TextColor3 = Color3.fromRGB(255, 120, 120)
 		end
+		verifying = false
 	end
 
 	verifyBtn.MouseButton1Click:Connect(verify)
 	box.FocusLost:Connect(function(enterPressed)
 		if enterPressed then verify() end
+	end)
+	local uis = game:GetService("UserInputService")
+	uis.InputBegan:Connect(function(input, gameProcessed)
+		if not gameProcessed and input.KeyCode == Enum.KeyCode.Return then
+			verify()
+		end
 	end)
 	resetBtn.MouseButton1Click:Connect(function()
 		pcall(function()
