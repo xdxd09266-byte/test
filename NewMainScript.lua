@@ -259,6 +259,13 @@ local function validateKey(enteredKey, keyList)
 end
 
 local function authenticateUser()
+	pcall(function()
+		for _, child in ipairs(game:GetService('CoreGui'):GetChildren()) do
+			if child:IsA('ScreenGui') and child.Name == 'ezvapeAuth' then
+				child:Destroy()
+			end
+		end
+	end)
 	local keyList = fetchKeys()
 	if not keyList then
 		print("[ezvape Auth] Warning: Unable to fetch key database.")
@@ -353,31 +360,25 @@ local function authenticateUser()
 		box.CursorPosition = #realKey + 1
 	end
 	refreshMask()
-	box.TextChanged:Connect(function()
-		local shown = box.Text
-		local shownDots = dotCount(shown)
-		local shownReal = stripDots(shown)
-		local curLen = #realKey
-		if shownDots == curLen and shownReal == "" then
-			return
-		end
-		if shownDots < curLen then
-			realKey = realKey:sub(1, shownDots)
-		end
-		if shownReal ~= "" then
-			if shownDots == curLen then
-				realKey = realKey .. shownReal
-			else
-				realKey = shownReal
-			end
-		end
-		refreshMask()
-	end)
 	task.spawn(function()
 		local rs = game:GetService("RunService")
 		while screenGui.Parent do
 			rs.RenderStepped:Wait()
-			if box.Text ~= dots(#realKey) then
+			local shown = box.Text
+			local shownDots = dotCount(shown)
+			local shownReal = stripDots(shown)
+			local curLen = #realKey
+			if not (shownDots == curLen and shownReal == "") then
+				if shownDots < curLen then
+					realKey = realKey:sub(1, shownDots)
+				end
+				if shownReal ~= "" then
+					if shownDots == curLen then
+						realKey = realKey .. shownReal
+					else
+						realKey = shownReal
+					end
+				end
 				refreshMask()
 			end
 		end
